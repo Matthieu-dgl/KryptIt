@@ -1,0 +1,60 @@
+﻿<Window x:Class="KryptIt.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:KryptIt.ViewModels"
+        Title="Coffre-Fort" Height="450" Width="600">
+    <Window.DataContext>
+        <!-- Définition du DataContext pour lier le ViewModel -->
+        <vm:PasswordViewModel/>
+    </Window.DataContext>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <!-- Définition des lignes pour la mise en page -->
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Section Ajouter un compte -->
+        <GroupBox Header="Ajouter un compte" Grid.Row="0" Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal" Margin="5">
+                <StackPanel Orientation="Vertical" Margin="0,0,10,0">
+                    <TextBlock>Nom du compte</TextBlock>
+                    <TextBox Width="150" Text="{Binding NewAccount, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Margin="0,0,10,0">
+                    <TextBlock>Mot de passe</TextBlock>
+                    <TextBox Width="150" Text="{Binding NewPassword, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Margin="0,0,10,0">
+                    <TextBlock>URL du site</TextBlock>
+                    <TextBox Width="150" Text="{Binding NewURL, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <Button Content="Ajouter" Command="{Binding AddPasswordCommand}" VerticalAlignment="Bottom"/>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Section Recherche -->
+        <GroupBox Header="Recherche" Grid.Row="1" Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal" Margin="5">
+                <TextBox Width="200" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                <Button Content="Rechercher" Command="{Binding SearchCommand}" Margin="10,0,0,0"/>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Section Mots de passe -->
+        <GroupBox Header="Mots de passe" Grid.Row="2">
+            <ListView ItemsSource="{Binding FilteredPasswords}">
+                <ListView.View>
+                    <GridView>
+                        <!-- Colonne pour l'URL -->
+                        <GridViewColumn Header="URL du site" DisplayMemberBinding="{Binding URL}" Width="150"/>
+                        <GridViewColumn Header="Nom du compte" DisplayMemberBinding="{Binding NomCompte}" Width="150"/>
+                        <GridViewColumn Header="Mot de passe (chiffré)" DisplayMemberBinding="{Binding MotDePasse}" Width="200"/>
+                        <GridViewColumn Header="Date d'ajout" DisplayMemberBinding="{Binding DateAjout}" Width="150"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </GroupBox>
+    </Grid>
+</Window>
