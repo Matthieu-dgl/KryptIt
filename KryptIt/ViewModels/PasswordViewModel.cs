@@ -79,7 +79,7 @@ namespace KryptIt.ViewModels
         public ICommand SearchCommand { get; }
 
         // Clé de chiffrement
-        private const string EncryptionKey = "MaCleSecrete123456"; // Clé de 16 caractères
+        private const string EncryptionKey = "MaCleSecrete123456";
 
         public PasswordViewModel()
         {

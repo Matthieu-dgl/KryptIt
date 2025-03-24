@@ -7,7 +7,6 @@ namespace KryptIt.Models
     {
         [Key]
         public int Id { get; set; }
-
         public string NomCompte { get; set; }
         public string MotDePasse { get; set; }
         public string URL { get; set; }
