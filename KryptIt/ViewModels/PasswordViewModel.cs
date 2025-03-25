@@ -10,10 +10,8 @@ namespace KryptIt.ViewModels
 {
     public class PasswordViewModel : INotifyPropertyChanged
     {
-        // Collection de tous les mots de passe
         public ObservableCollection<PasswordEntry> AllPasswords { get; set; }
 
-        // Collection filtrée selon la recherche
         private ObservableCollection<PasswordEntry> _filteredPasswords;
         public ObservableCollection<PasswordEntry> FilteredPasswords
         {
@@ -25,7 +23,6 @@ namespace KryptIt.ViewModels
             }
         }
 
-        // Texte de recherche
         private string _searchText;
         public string SearchText
         {
@@ -34,11 +31,10 @@ namespace KryptIt.ViewModels
             {
                 _searchText = value;
                 OnPropertyChanged(nameof(SearchText));
-                ExecuteSearch(); // Rechercher dès que le texte change
+                ExecuteSearch();
             }
         }
 
-        // Champs pour un nouveau mot de passe
         private string _newAccount;
         public string NewAccount
         {
@@ -74,9 +70,7 @@ namespace KryptIt.ViewModels
             }
         }
 
-        // Commandes
         public ICommand AddPasswordCommand { get; }
-        public ICommand SearchCommand { get; }
 
         // Clé de chiffrement
         private const string EncryptionKey = "MaCleSecrete123456";
@@ -86,23 +80,18 @@ namespace KryptIt.ViewModels
             AllPasswords = new ObservableCollection<PasswordEntry>();
             FilteredPasswords = new ObservableCollection<PasswordEntry>();
 
-            // Commande pour ajouter un mot de passe
             AddPasswordCommand = new RelayCommand(o => AddPassword(), o =>
                 !string.IsNullOrWhiteSpace(NewAccount) && !string.IsNullOrWhiteSpace(NewPassword));
-
-            // Commande pour la recherche
-            SearchCommand = new RelayCommand(o => ExecuteSearch());
 
             LoadPasswordsFromDatabase();
             ExecuteSearch();
         }
 
-        // Charger les mots de passe depuis la base de données
         private void LoadPasswordsFromDatabase()
         {
             using (var context = new AppDbContext())
             {
-                var passwords = context.PasswordEntries.ToList();
+                var passwords = context.PasswordEntry.ToList();
                 foreach (var password in passwords)
                 {
                     AllPasswords.Add(password);
@@ -110,32 +99,28 @@ namespace KryptIt.ViewModels
             }
         }
 
-        // Ajouter un mot de passe (avec chiffrement)
         public void AddPassword()
         {
             string encryptedPassword = SecurityHelper.Encrypt(NewPassword, EncryptionKey);
             var entry = new PasswordEntry
             {
-                URL = NewURL,
-                NomCompte = NewAccount,
-                MotDePasse = encryptedPassword,
-                DateAjout = DateTime.Now
+                UserId = 1,
+                SiteName = NewURL,
+                Login = NewAccount,
+                EncryptedPassword = encryptedPassword,
+                CreatedAt = DateTime.Now
             };
 
-            // Ajouter à la collection locale
             AllPasswords.Add(entry);
 
-            // Ajouter à la base de données
             using (var context = new AppDbContext())
             {
-                context.PasswordEntries.Add(entry);
+                context.PasswordEntry.Add(entry);
                 context.SaveChanges();
             }
 
-            // Mettre à jour la recherche
             ExecuteSearch();
 
-            // Réinitialiser les champs après ajout
             NewAccount = string.Empty;
             NewPassword = string.Empty;
             NewURL = string.Empty;
@@ -145,7 +130,6 @@ namespace KryptIt.ViewModels
             OnPropertyChanged(nameof(NewURL));
         }
 
-        // Effectuer la recherche dans la liste de mots de passe
         public void ExecuteSearch()
         {
             if (string.IsNullOrWhiteSpace(SearchText))
@@ -154,12 +138,11 @@ namespace KryptIt.ViewModels
             }
             else
             {
-                var filtered = AllPasswords.Where(p => p.NomCompte.IndexOf(SearchText, StringComparison.InvariantCultureIgnoreCase) >= 0);
+                var filtered = AllPasswords.Where(p => p.Login.IndexOf(SearchText, StringComparison.InvariantCultureIgnoreCase) >= 0);
                 FilteredPasswords = new ObservableCollection<PasswordEntry>(filtered);
             }
         }
 
-        // Implémentation de l'interface INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
