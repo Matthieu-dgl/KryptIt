@@ -2,13 +2,14 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Windows;
 using System.Windows.Input;
 using KryptIt.Helpers;
 using KryptIt.Models;
 
 namespace KryptIt.ViewModels
 {
-    public class PasswordViewModel : INotifyPropertyChanged
+    public class MainViewModel : INotifyPropertyChanged
     {
         public ObservableCollection<PasswordEntry> AllPasswords { get; set; }
 
@@ -70,13 +71,35 @@ namespace KryptIt.ViewModels
             }
         }
 
+        private PasswordEntry _selectedPassword;
+        public PasswordEntry SelectedPassword
+        {
+            get => _selectedPassword;
+            set
+            {
+                _selectedPassword = value;
+                OnPropertyChanged(nameof(SelectedPassword));
+            }
+        }
+
         public ICommand AddPasswordCommand { get; }
+        public ICommand OpenInNewTabCommand { get; }
+        public ICommand CopyUsernameCommand { get; }
+        public ICommand CopyPasswordCommand { get; }
+        public ICommand CopyWebsiteCommand { get; }
+        public ICommand DeleteCommand { get; }
 
         // Clé de chiffrement
         private const string EncryptionKey = "MaCleSecrete123456";
 
-        public PasswordViewModel()
+        public MainViewModel()
         {
+            OpenInNewTabCommand = new RelayCommand(o => OpenInNewTab(), o => true);
+            CopyUsernameCommand = new RelayCommand(o => CopyUsername(), o => true);
+            CopyPasswordCommand = new RelayCommand(o => CopyPassword(), o => true);
+            CopyWebsiteCommand = new RelayCommand(o => CopyWebsite(), o => true);
+            DeleteCommand = new RelayCommand(o => DeletePassword(), o => SelectedPassword != null);
+
             AllPasswords = new ObservableCollection<PasswordEntry>();
             FilteredPasswords = new ObservableCollection<PasswordEntry>();
 
@@ -85,6 +108,63 @@ namespace KryptIt.ViewModels
 
             LoadPasswordsFromDatabase();
             ExecuteSearch();
+        }
+
+        private void OpenInNewTab()
+        {
+            if (SelectedPassword != null && Uri.IsWellFormedUriString(SelectedPassword.SiteName, UriKind.Absolute))
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = SelectedPassword.SiteName,
+                        UseShellExecute = true // Utilise le navigateur par défaut
+                    });
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Erreur lors de l'ouverture du lien : " + ex.Message);
+                }
+            }
+            else
+            {
+                MessageBox.Show("L'URL est invalide ou non définie.");
+            }
+        }
+
+        private void CopyUsername()
+        {
+            Clipboard.SetText(SelectedPassword?.Login);
+        }
+
+        private void CopyPassword()
+        {
+            Clipboard.SetText(SelectedPassword?.EncryptedPassword);
+        }
+
+        private void CopyWebsite()
+        {
+            Clipboard.SetText(SelectedPassword?.SiteName);
+        }
+
+        private void DeletePassword()
+        {
+            if (SelectedPassword != null)
+            {
+                using (var context = new AppDbContext())
+                {
+                    var passwordEntry = context.PasswordEntry.SingleOrDefault(p => p.Id == SelectedPassword.Id);
+                    if (passwordEntry != null)
+                    {
+                        context.PasswordEntry.Remove(passwordEntry);
+                        context.SaveChanges();
+                    }
+                }
+
+                AllPasswords.Remove(SelectedPassword);
+                ExecuteSearch();
+            }
         }
 
         private void LoadPasswordsFromDatabase()
