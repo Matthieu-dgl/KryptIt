@@ -91,7 +91,7 @@ namespace KryptIt.ViewModels
         {
             using (var context = new AppDbContext())
             {
-                var passwords = context.PasswordEntry.ToList();
+                var passwords = context.PasswordEntry.Where(p => p.UserId == SessionManager.CurrentUser.Id).ToList();
                 foreach (var password in passwords)
                 {
                     AllPasswords.Add(password);
@@ -104,7 +104,7 @@ namespace KryptIt.ViewModels
             string encryptedPassword = SecurityHelper.Encrypt(NewPassword, EncryptionKey);
             var entry = new PasswordEntry
             {
-                UserId = 1,
+                UserId = SessionManager.CurrentUser.Id,
                 SiteName = NewURL,
                 Login = NewAccount,
                 EncryptedPassword = encryptedPassword,
