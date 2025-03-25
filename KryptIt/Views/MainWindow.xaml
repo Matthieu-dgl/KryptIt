@@ -205,6 +205,28 @@
                           ScrollViewer.VerticalScrollBarVisibility="Auto"
                           Style="{StaticResource ModernListView}"
                           SelectedItem="{Binding SelectedPassword}">
+                        <ListView.Resources>
+                            <ContextMenu x:Key="ItemContextMenu">
+                                <MenuItem Header="Open in new Tab" Command="{Binding DataContext.OpenInNewTabCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                <Separator/>
+                                <MenuItem Header="Copy Username" Command="{Binding DataContext.CopyUsernameCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                <MenuItem Header="Copy Password" Command="{Binding DataContext.CopyPasswordCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                <MenuItem Header="Copy Website" Command="{Binding DataContext.CopyWebsiteCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                <Separator/>
+                                <MenuItem Header="Delete" Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                            </ContextMenu>
+                            <ContextMenu x:Key="EmptyAreaContextMenu">
+                                <MenuItem Header="Add an entry" Command="{Binding AddPasswordCommand}" />
+                            </ContextMenu>
+                        </ListView.Resources>
+                        <ListView.ContextMenu>
+                            <StaticResource ResourceKey="EmptyAreaContextMenu"/>
+                        </ListView.ContextMenu>
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="ContextMenu" Value="{StaticResource ItemContextMenu}"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn Header="URL" Width="180">
@@ -237,19 +259,6 @@
                                 </GridViewColumn>
                             </GridView>
                         </ListView.View>
-
-                        <!-- Ajout du ContextMenu -->
-                        <ListView.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="Open in new Tab" Command="{Binding OpenInNewTabCommand}" />
-                                <Separator/>
-                                <MenuItem Header="Copy Username" Command="{Binding CopyUsernameCommand}" />
-                                <MenuItem Header="Copy Password" Command="{Binding CopyPasswordCommand}" />
-                                <MenuItem Header="Copy Website" Command="{Binding CopyWebsiteCommand}" />
-                                <Separator/>
-                                <MenuItem Header="Delete" Command="{Binding DeleteCommand}" />
-                            </ContextMenu>
-                        </ListView.ContextMenu>
                     </ListView>
                 </Border>
             </Grid>

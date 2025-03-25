@@ -82,29 +82,27 @@ namespace KryptIt.ViewModels
             }
         }
 
-        public ICommand AddPasswordCommand { get; }
         public ICommand OpenInNewTabCommand { get; }
         public ICommand CopyUsernameCommand { get; }
         public ICommand CopyPasswordCommand { get; }
         public ICommand CopyWebsiteCommand { get; }
         public ICommand DeleteCommand { get; }
+        public ICommand AddPasswordCommand { get; }
 
         // Clé de chiffrement
         private const string EncryptionKey = "MaCleSecrete123456";
 
         public MainViewModel()
         {
-            OpenInNewTabCommand = new RelayCommand(o => OpenInNewTab(), o => true);
-            CopyUsernameCommand = new RelayCommand(o => CopyUsername(), o => true);
-            CopyPasswordCommand = new RelayCommand(o => CopyPassword(), o => true);
-            CopyWebsiteCommand = new RelayCommand(o => CopyWebsite(), o => true);
+            OpenInNewTabCommand = new RelayCommand(o => OpenInNewTab(), o => SelectedPassword != null);
+            CopyUsernameCommand = new RelayCommand(o => CopyUsername(), o => SelectedPassword != null);
+            CopyPasswordCommand = new RelayCommand(o => CopyPassword(), o => SelectedPassword != null);
+            CopyWebsiteCommand = new RelayCommand(o => CopyWebsite(), o => SelectedPassword != null);
             DeleteCommand = new RelayCommand(o => DeletePassword(), o => SelectedPassword != null);
+            AddPasswordCommand = new RelayCommand(o => AddPassword(), o => !string.IsNullOrWhiteSpace(NewAccount) && !string.IsNullOrWhiteSpace(NewPassword));
 
             AllPasswords = new ObservableCollection<PasswordEntry>();
             FilteredPasswords = new ObservableCollection<PasswordEntry>();
-
-            AddPasswordCommand = new RelayCommand(o => AddPassword(), o =>
-                !string.IsNullOrWhiteSpace(NewAccount) && !string.IsNullOrWhiteSpace(NewPassword));
 
             LoadPasswordsFromDatabase();
             ExecuteSearch();
