@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:vm="clr-namespace:KryptIt.ViewModels"
-        Title="QuickPass"
+        Title="KryptIt"
         Width="1000" Height="600"
         Background="#F7F7F7"
         WindowStartupLocation="CenterScreen">
@@ -75,7 +75,7 @@
                                    Height="24"
                                    Foreground="Black"
                                    Margin="0,0,5,0"/>
-                    <TextBlock Text="QuickPass" Style="{StaticResource HeaderTextStyle}" />
+                    <TextBlock Text="KryptIt" Style="{StaticResource HeaderTextStyle}" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" />
                 <materialDesign:PackIcon Kind="Account"
