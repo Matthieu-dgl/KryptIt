@@ -52,7 +52,7 @@
 
     <!-- Affectation du ViewModel pour les bindings -->
     <Window.DataContext>
-        <vm:PasswordViewModel/>
+        <vm:MainViewModel/>
     </Window.DataContext>
 
     <Grid>
@@ -202,8 +202,9 @@
                 BorderThickness="1"
                 BorderBrush="#E0E0E0">
                     <ListView ItemsSource="{Binding FilteredPasswords}"
-                    ScrollViewer.VerticalScrollBarVisibility="Auto"
-                    Style="{StaticResource ModernListView}">
+                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                          Style="{StaticResource ModernListView}"
+                          SelectedItem="{Binding SelectedPassword}">
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn Header="URL" Width="180">
@@ -236,6 +237,19 @@
                                 </GridViewColumn>
                             </GridView>
                         </ListView.View>
+
+                        <!-- Ajout du ContextMenu -->
+                        <ListView.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Open in new Tab" Command="{Binding OpenInNewTabCommand}" />
+                                <Separator/>
+                                <MenuItem Header="Copy Username" Command="{Binding CopyUsernameCommand}" />
+                                <MenuItem Header="Copy Password" Command="{Binding CopyPasswordCommand}" />
+                                <MenuItem Header="Copy Website" Command="{Binding CopyWebsiteCommand}" />
+                                <Separator/>
+                                <MenuItem Header="Delete" Command="{Binding DeleteCommand}" />
+                            </ContextMenu>
+                        </ListView.ContextMenu>
                     </ListView>
                 </Border>
             </Grid>
