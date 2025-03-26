@@ -82,12 +82,28 @@ namespace KryptIt.ViewModels
             }
         }
 
+        // Propriété pour gérer l'affichage de la pop-up
+        private bool _isPopupOpen;
+        public bool IsPopupOpen
+        {
+            get => _isPopupOpen;
+            set
+            {
+                _isPopupOpen = value;
+                OnPropertyChanged(nameof(IsPopupOpen));
+            }
+        }
+
         public ICommand OpenInNewTabCommand { get; }
         public ICommand CopyUsernameCommand { get; }
         public ICommand CopyPasswordCommand { get; }
         public ICommand CopyWebsiteCommand { get; }
         public ICommand DeleteCommand { get; }
         public ICommand AddPasswordCommand { get; }
+
+        // Commandes pour ouvrir et fermer la pop-up
+        public ICommand OpenPopupCommand { get; }
+        public ICommand ClosePopupCommand { get; }
 
         // Clé de chiffrement
         private const string EncryptionKey = "MaCleSecrete123456";
@@ -100,6 +116,9 @@ namespace KryptIt.ViewModels
             CopyWebsiteCommand = new RelayCommand(o => CopyWebsite(), o => SelectedPassword != null);
             DeleteCommand = new RelayCommand(o => DeletePassword(), o => SelectedPassword != null);
             AddPasswordCommand = new RelayCommand(o => AddPassword(), o => !string.IsNullOrWhiteSpace(NewAccount) && !string.IsNullOrWhiteSpace(NewPassword));
+
+            OpenPopupCommand = new RelayCommand(o => IsPopupOpen = true);
+            ClosePopupCommand = new RelayCommand(o => IsPopupOpen = false);
 
             AllPasswords = new ObservableCollection<PasswordEntry>();
             FilteredPasswords = new ObservableCollection<PasswordEntry>();
@@ -199,13 +218,14 @@ namespace KryptIt.ViewModels
 
             ExecuteSearch();
 
+            // Réinitialisation des champs et fermeture de la pop-up
             NewAccount = string.Empty;
             NewPassword = string.Empty;
             NewURL = string.Empty;
-
             OnPropertyChanged(nameof(NewAccount));
             OnPropertyChanged(nameof(NewPassword));
             OnPropertyChanged(nameof(NewURL));
+            IsPopupOpen = false;
         }
 
         public void ExecuteSearch()
