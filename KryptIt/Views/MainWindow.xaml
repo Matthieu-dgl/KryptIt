@@ -191,7 +191,7 @@
                 BorderThickness="1"
                 BorderBrush="#E0E0E0">
                     <TextBox Style="{StaticResource SearchTextBox}" 
-                   Text="{Binding SearchText}"
+                   Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                    FontSize="14"/>
                 </Border>
 
