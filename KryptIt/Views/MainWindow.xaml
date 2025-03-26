@@ -48,6 +48,25 @@
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Padding" Value="10"/>
         </Style>
+        <Style x:Key="WatermarkTextBox" TargetType="TextBox">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Grid>
+                            <!-- Contenu de la zone de texte -->
+                            <ScrollViewer x:Name="PART_ContentHost"/>
+                            <!-- Watermark affiché lorsque le TextBox est vide -->
+                            <TextBlock Text="Search"
+                                       Foreground="Gray"
+                                       Margin="5,0,0,0"
+                                       VerticalAlignment="Center"
+                                       IsHitTestVisible="False"
+                                       Visibility="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <!-- Affectation du ViewModel pour les bindings -->
@@ -68,23 +87,31 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" Grid.Column="0" VerticalAlignment="Center">
                     <materialDesign:PackIcon Kind="Lock"
-                                   Width="24"
-                                   Height="24"
-                                   Foreground="Black"
-                                   Margin="0,0,5,0"/>
+                                             Width="24"
+                                             Height="24"
+                                             Foreground="Black"
+                                             Margin="0,0,5,0"/>
                     <TextBlock Text="KryptIt" Style="{StaticResource HeaderTextStyle}" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" />
                 <materialDesign:PackIcon Kind="Account"
-                                 Width="24"
-                                 Height="24"
-                                 Foreground="Black"
-                                 HorizontalAlignment="Right"
-                                 VerticalAlignment="Center"
-                                 Grid.Column="2"/>
+                                         Width="24"
+                                         Height="24"
+                                         Foreground="Black"
+                                         HorizontalAlignment="Right"
+                                         VerticalAlignment="Center"
+                                         Grid.Column="2"/>
+                <!-- Bouton pour ouvrir la pop-up -->
+                <Button Grid.Column="3" 
+                        Content="Ajouter" 
+                        Command="{Binding OpenPopupCommand}"
+                        Style="{StaticResource PrimaryButton}"
+                        Margin="5,0,0,0"
+                        VerticalAlignment="Center"/>
             </Grid>
         </Border>
 
@@ -97,24 +124,24 @@
 
             <!-- SIDEBAR -->
             <Border Grid.Column="0"
-              Background="White"
-              BorderBrush="#E0E0E0"
-              BorderThickness="0,1,1,0">
+                    Background="White"
+                    BorderBrush="#E0E0E0"
+                    BorderThickness="0,1,1,0">
                 <StackPanel>
                     <TextBlock Text="Settings"
-                     Margin="10,15,0,5"
-                     FontWeight="Bold"
-                     FontSize="14"
-                     Foreground="Black"/>
+                               Margin="10,15,0,5"
+                               FontWeight="Bold"
+                               FontSize="14"
+                               Foreground="Black"/>
                     <StackPanel Margin="10,0,0,0">
                         <TextBlock Text="General" Style="{StaticResource SidebarItemTextStyle}"/>
                         <TextBlock Text="Security" Style="{StaticResource SidebarItemTextStyle}"/>
                     </StackPanel>
                     <TextBlock Text="Folders"
-                     Margin="10,15,0,5"
-                     FontWeight="Bold"
-                     FontSize="14"
-                     Foreground="Black"/>
+                               Margin="10,15,0,5"
+                               FontWeight="Bold"
+                               FontSize="14"
+                               Foreground="Black"/>
                     <StackPanel Margin="10,0,0,0">
                         <TextBlock Text="Work" Style="{StaticResource SidebarItemTextStyle}"/>
                         <TextBlock Text="Personal" Style="{StaticResource SidebarItemTextStyle}"/>
@@ -122,89 +149,38 @@
                 </StackPanel>
             </Border>
 
-            <!-- MAIN CONTENT -->
+            <!-- MAIN CONTENT (Recherche et liste des mots de passe) -->
             <Grid Grid.Column="1" Margin="20">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <!-- Section Ajout -->
-                    <RowDefinition Height="Auto"/>
                     <!-- Section Recherche -->
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
                     <!-- Liste des mots de passe -->
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <!-- Section Ajout -->
-                <Border Grid.Row="0" 
-                Background="White"
-                CornerRadius="5"
-                Padding="15"
-                Margin="0 0 0 15"
-                BorderThickness="1"
-                BorderBrush="#E0E0E0">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <!-- Nom du compte -->
-                        <StackPanel Grid.Column="0" Margin="0 0 15 0">
-                            <TextBlock Text="Nom du compte" Foreground="#607D8B" FontSize="12"/>
-                            <TextBox Style="{StaticResource ModernTextBox}" 
-                       Text="{Binding NewAccount}" 
-                       Margin="0 5 0 0"/>
-                        </StackPanel>
-
-                        <!-- Mot de passe -->
-                        <StackPanel Grid.Column="1" Margin="0 0 15 0">
-                            <TextBlock Text="Mot de passe" Foreground="#607D8B" FontSize="12"/>
-                            <TextBox Style="{StaticResource ModernTextBox}" 
-                       Text="{Binding NewPassword}" 
-                       Margin="0 5 0 0"/>
-                        </StackPanel>
-
-                        <!-- URL -->
-                        <StackPanel Grid.Column="2" Margin="0 0 15 0">
-                            <TextBlock Text="URL du site" Foreground="#607D8B" FontSize="12"/>
-                            <TextBox Style="{StaticResource ModernTextBox}" 
-                       Text="{Binding NewURL}" 
-                       Margin="0 5 0 0"/>
-                        </StackPanel>
-
-                        <!-- Bouton Ajouter -->
-                        <Button Grid.Column="3" 
-                    Content="Ajouter"
-                    Command="{Binding AddPasswordCommand}"
-                    Style="{StaticResource PrimaryButton}"
-                    VerticalAlignment="Bottom"/>
-                    </Grid>
-                </Border>
-
                 <!-- Section Recherche -->
-                <Border Grid.Row="1" 
-                Background="White"
-                CornerRadius="5"
-                Padding="10"
-                Margin="0 0 0 15"
-                BorderThickness="1"
-                BorderBrush="#E0E0E0">
+                <Border Grid.Row="0" 
+                        Background="White"
+                        CornerRadius="5"
+                        Padding="10"
+                        Margin="0 0 0 15"
+                        BorderThickness="1"
+                        BorderBrush="#E0E0E0">
                     <TextBox Style="{StaticResource SearchTextBox}" 
                    Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                    FontSize="14"/>
                 </Border>
 
                 <!-- Liste des mots de passe -->
-                <Border Grid.Row="2" 
-                Background="White"
-                CornerRadius="5"
-                BorderThickness="1"
-                BorderBrush="#E0E0E0">
+                <Border Grid.Row="1" 
+                        Background="White"
+                        CornerRadius="5"
+                        BorderThickness="1"
+                        BorderBrush="#E0E0E0">
                     <ListView ItemsSource="{Binding FilteredPasswords}"
-                          ScrollViewer.VerticalScrollBarVisibility="Auto"
-                          Style="{StaticResource ModernListView}"
-                          SelectedItem="{Binding SelectedPassword}">
+                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                              Style="{StaticResource ModernListView}"
+                              SelectedItem="{Binding SelectedPassword}">
                         <ListView.Resources>
                             <ContextMenu x:Key="ItemContextMenu">
                                 <MenuItem Header="Open in new Tab" Command="{Binding DataContext.OpenInNewTabCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
@@ -263,5 +239,55 @@
                 </Border>
             </Grid>
         </Grid>
+
+        <!-- POP-UP pour ajouter un compte (balise Popup) -->
+        <Popup IsOpen="{Binding IsPopupOpen}" 
+               Placement="Center" 
+               AllowsTransparency="True"
+               PopupAnimation="Fade"
+               StaysOpen="False">
+            <Border Background="White" 
+                    CornerRadius="5" 
+                    Padding="20" 
+                    BorderBrush="#E0E0E0" 
+                    BorderThickness="1"
+                    HorizontalAlignment="Center" 
+                    VerticalAlignment="Center">
+                <StackPanel>
+                    <TextBlock Text="Ajouter un nouveau compte" 
+                               FontSize="16" 
+                               FontWeight="Bold" 
+                               Margin="0,0,0,10" 
+                               Foreground="Black"/>
+                    <!-- Nom du compte -->
+                    <TextBlock Text="Nom du compte" Foreground="#607D8B" FontSize="12"/>
+                    <TextBox Style="{StaticResource ModernTextBox}" 
+                             Text="{Binding NewAccount}" 
+                             Margin="0,5,0,10"/>
+                    <!-- Mot de passe -->
+                    <TextBlock Text="Mot de passe" Foreground="#607D8B" FontSize="12"/>
+                    <TextBox Style="{StaticResource ModernTextBox}" 
+                             Text="{Binding NewPassword}" 
+                             Margin="0,5,0,10"/>
+                    <!-- URL -->
+                    <TextBlock Text="URL du site" Foreground="#607D8B" FontSize="12"/>
+                    <TextBox Style="{StaticResource ModernTextBox}" 
+                             Text="{Binding NewURL}" 
+                             Margin="0,5,0,10"/>
+                    <!-- Boutons de validation -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Annuler" 
+                                Command="{Binding ClosePopupCommand}" 
+                                Style="{StaticResource PrimaryButton}" 
+                                Background="Gray"
+                                Margin="0,0,10,0"/>
+                        <Button Content="Ajouter" 
+                                Command="{Binding AddPasswordCommand}" 
+                                Style="{StaticResource PrimaryButton}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Popup>
+
     </Grid>
 </Window>
