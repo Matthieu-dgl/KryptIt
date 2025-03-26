@@ -35,12 +35,27 @@
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
         <Style x:Key="PrimaryButton" TargetType="Button">
-            <Setter Property="Background" Value="#2196F3"/>
+            <Setter Property="Background" Value="Black"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Padding" Value="12 6"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                        BorderBrush="{TemplateBinding BorderBrush}" 
+                        BorderThickness="1"
+                        CornerRadius="15"
+                            Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"
+                                     RecognizesAccessKey="True"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style x:Key="ModernListView" TargetType="ListView">
             <Setter Property="BorderThickness" Value="0"/>
@@ -92,29 +107,40 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
+
                 <StackPanel Orientation="Horizontal" Grid.Column="0" VerticalAlignment="Center">
                     <materialDesign:PackIcon Kind="Lock"
-                                             Width="24"
-                                             Height="24"
-                                             Foreground="Black"
-                                             Margin="0,0,5,0"/>
+                                 Width="24"
+                                 Height="24"
+                                 Foreground="Black"
+                                 Margin="0,0,5,0"/>
                     <TextBlock Text="KryptIt" Style="{StaticResource HeaderTextStyle}" />
                 </StackPanel>
+
                 <StackPanel Grid.Column="1" />
-                <materialDesign:PackIcon Kind="Account"
-                                         Width="24"
-                                         Height="24"
-                                         Foreground="Black"
-                                         HorizontalAlignment="Right"
-                                         VerticalAlignment="Center"
-                                         Grid.Column="2"/>
-                <!-- Bouton pour ouvrir la pop-up -->
-                <Button Grid.Column="3" 
-                        Content="Ajouter" 
+
+                <!-- Inverser la colonne du bouton et de l'icône -->
+                <Button Grid.Column="2"
                         Command="{Binding OpenPopupCommand}"
                         Style="{StaticResource PrimaryButton}"
                         Margin="5,0,0,0"
-                        VerticalAlignment="Center"/>
+                        VerticalAlignment="Center">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <materialDesign:PackIcon Kind="Plus" Width="20" Height="20" Margin="0,0,10,0"/>
+                            <TextBlock Text="Ajouter" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button.Content>
+                </Button>
+
+                <materialDesign:PackIcon Kind="Account"
+                             Width="24"
+                             Height="24"
+                             Foreground="Black"
+                             HorizontalAlignment="Right"
+                             VerticalAlignment="Center"
+                             Grid.Column="3"
+                             Margin="20,0,10,0"/>
             </Grid>
         </Border>
 
@@ -127,34 +153,48 @@
 
             <!-- SIDEBAR -->
             <Border Grid.Column="0"
-                    Background="White"
-                    BorderBrush="#E0E0E0"
-                    BorderThickness="0,1,1,0">
-                <StackPanel>
-                    <TextBlock Text="Tags"
-                               Margin="10,15,0,5"
-                               FontWeight="Bold"
-                               FontSize="14"
-                               Foreground="Black"/>
-                    <StackPanel Margin="10,0,0,0">
-                        <TextBlock Text="Home" Style="{StaticResource SidebarItemTextStyle}"/>
-                        <TextBlock Text="Work" Style="{StaticResource SidebarItemTextStyle}"/>
-                        <TextBlock Text="Private" Style="{StaticResource SidebarItemTextStyle}"/>
-                        <TextBlock Text="Games" Style="{StaticResource SidebarItemTextStyle}"/>
-                        <TextBlock Text="" Style="{StaticResource SidebarItemTextStyle}"/>
+                Background="White"
+                BorderBrush="#E0E0E0"
+                BorderThickness="0,1,1,0">
+                <Grid>
+                    <!-- Définir deux lignes : une pour le contenu, une autre pour le bouton -->
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <!-- Contenu du haut -->
+                        <RowDefinition Height="*" />
+                        <!-- Espace flexible -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Bouton en bas -->
+                    </Grid.RowDefinitions>
 
+                    <!-- Contenu du haut (Settings et Folders) -->
+                    <StackPanel Grid.Row="0">
+                        <TextBlock Text="Tags"
+                                   Margin="10,15,0,5"
+                                   FontWeight="Bold"
+                                   FontSize="14"
+                                   Foreground="Black"/>
+                        <StackPanel Margin="10,0,0,0">
+                            <TextBlock Text="Work" Style="{StaticResource SidebarItemTextStyle}"/>
+                            <TextBlock Text="Personal" Style="{StaticResource SidebarItemTextStyle}"/>
+                        </StackPanel>
                     </StackPanel>
-                    <TextBlock Text="Folders"
-                               Margin="10,15,0,5"
-                               FontWeight="Bold"
-                               FontSize="14"
-                               Foreground="Black"/>
-                    <StackPanel Margin="10,0,0,0">
-                        <TextBlock Text="Work" Style="{StaticResource SidebarItemTextStyle}"/>
-                        <TextBlock Text="Personal" Style="{StaticResource SidebarItemTextStyle}"/>
-                    </StackPanel>
-                </StackPanel>
+                    <Button Grid.Row="2"
+                            Command="{Binding OpenSettingsCommand}"
+                            Style="{StaticResource PrimaryButton}"
+                            Margin="10,10,10,20"
+                            VerticalAlignment="Bottom">
+                        <Button.Content>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <materialDesign:PackIcon Kind="Settings" Width="20" Height="20" Margin="0,0,10,0"/>
+                                <TextBlock Text="Settings" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
+
+                </Grid>
             </Border>
+
 
             <!-- MAIN CONTENT (Recherche et liste des mots de passe) -->
             <Grid Grid.Column="1" Margin="20">
@@ -199,7 +239,7 @@
                                 <MenuItem Header="Delete" Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
                             </ContextMenu>
                             <ContextMenu x:Key="EmptyAreaContextMenu">
-                                <MenuItem Header="Add an entry" Command="{Binding AddPasswordCommand}" />
+                                <MenuItem Header="Add an entry" Command="{Binding OpenPopupCommand}" />
                             </ContextMenu>
                         </ListView.Resources>
                         <ListView.ContextMenu>
@@ -210,6 +250,9 @@
                                 <Setter Property="ContextMenu" Value="{StaticResource ItemContextMenu}"/>
                             </Style>
                         </ListView.ItemContainerStyle>
+                        <ListView.InputBindings>
+                            <KeyBinding Key="Delete" Command="{Binding DeleteCommand}" />
+                        </ListView.InputBindings>
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn Header="URL" Width="180">
