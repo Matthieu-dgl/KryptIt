@@ -3,12 +3,15 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:vm="clr-namespace:KryptIt.ViewModels"
+        xmlns:conv="clr-namespace:KryptIt.Converter"
         Title="KryptIt"
         Width="1000" Height="600"
         Background="#F7F7F7"
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
+        <conv:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter"/>
+
         <!-- Ressources Design Sidebar et Header -->
         <Style x:Key="SidebarItemTextStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="14"/>
@@ -128,14 +131,18 @@
                     BorderBrush="#E0E0E0"
                     BorderThickness="0,1,1,0">
                 <StackPanel>
-                    <TextBlock Text="Settings"
+                    <TextBlock Text="Tags"
                                Margin="10,15,0,5"
                                FontWeight="Bold"
                                FontSize="14"
                                Foreground="Black"/>
                     <StackPanel Margin="10,0,0,0">
-                        <TextBlock Text="General" Style="{StaticResource SidebarItemTextStyle}"/>
-                        <TextBlock Text="Security" Style="{StaticResource SidebarItemTextStyle}"/>
+                        <TextBlock Text="Home" Style="{StaticResource SidebarItemTextStyle}"/>
+                        <TextBlock Text="Work" Style="{StaticResource SidebarItemTextStyle}"/>
+                        <TextBlock Text="Private" Style="{StaticResource SidebarItemTextStyle}"/>
+                        <TextBlock Text="Games" Style="{StaticResource SidebarItemTextStyle}"/>
+                        <TextBlock Text="" Style="{StaticResource SidebarItemTextStyle}"/>
+
                     </StackPanel>
                     <TextBlock Text="Folders"
                                Margin="10,15,0,5"
@@ -162,13 +169,13 @@
                 <Border Grid.Row="0" 
                         Background="White"
                         CornerRadius="5"
-                        Padding="10"
-                        Margin="0 0 0 15"
+                        Margin="0 0 0 10"
                         BorderThickness="1"
                         BorderBrush="#E0E0E0">
-                    <TextBox Style="{StaticResource SearchTextBox}" 
-                   Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                   FontSize="14"/>
+                    <TextBox Style="{StaticResource WatermarkTextBox}" 
+                        Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                        FontSize="14"/>
+
                 </Border>
 
                 <!-- Liste des mots de passe -->
