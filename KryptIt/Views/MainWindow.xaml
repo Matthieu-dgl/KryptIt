@@ -28,7 +28,7 @@
         <!-- Styles pour les contrôles modernes (empruntés du 2e code) -->
         <Style x:Key="ModernTextBox" TargetType="TextBox">
             <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Padding" Value="8"/>
+            <Setter Property="Padding" Value="10"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="BorderBrush" Value="#E0E0E0"/>
             <Setter Property="Background" Value="#FAFAFA"/>
@@ -119,7 +119,6 @@
 
                 <StackPanel Grid.Column="1" />
 
-                <!-- Inverser la colonne du bouton et de l'icône -->
                 <Button Grid.Column="2"
                         Command="{Binding OpenPopupCommand}"
                         Style="{StaticResource PrimaryButton}"
@@ -207,16 +206,32 @@
 
                 <!-- Section Recherche -->
                 <Border Grid.Row="0" 
-                        Background="White"
-                        CornerRadius="5"
-                        Margin="0 0 0 10"
-                        BorderThickness="1"
-                        BorderBrush="#E0E0E0">
-                    <TextBox Style="{StaticResource WatermarkTextBox}" 
-                        Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                        FontSize="14"/>
+                    Background="White"
+                    CornerRadius="5"
+                    Margin="0 0 0 10"
+                    BorderThickness="1"
+                    BorderBrush="#E0E0E0"
+                    Height="40">
+                    <Grid>
+                        <!-- Icône de loupe -->
+                        <materialDesign:PackIcon Kind="Magnify"
+                                 Width="16"
+                                 Height="16"
+                                 HorizontalAlignment="Left"
+                                 VerticalAlignment="Center"
+                                 Margin="10,0,0,0" />
 
+                        <!-- La TextBox -->
+                        <TextBox Style="{StaticResource WatermarkTextBox}" 
+                            Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                            FontSize="14"
+                            VerticalContentAlignment="Center"
+                            VerticalAlignment="Center"
+                            Padding="3 0 0 0"
+                            Margin="25 0 0 0" />
+                    </Grid>
                 </Border>
+
 
                 <!-- Liste des mots de passe -->
                 <Border Grid.Row="1" 
@@ -290,7 +305,7 @@
             </Grid>
         </Grid>
 
-        <!-- POP-UP pour ajouter un compte (balise Popup) -->
+        <!-- POP-UP -->
         <Popup IsOpen="{Binding IsPopupOpen}" 
                Placement="Center" 
                AllowsTransparency="True"
@@ -309,22 +324,22 @@
                                FontWeight="Bold" 
                                Margin="0,0,0,10" 
                                Foreground="Black"/>
-                    <!-- Nom du compte -->
+
                     <TextBlock Text="Nom du compte" Foreground="#607D8B" FontSize="12"/>
                     <TextBox Style="{StaticResource ModernTextBox}" 
                              Text="{Binding NewAccount}" 
                              Margin="0,5,0,10"/>
-                    <!-- Mot de passe -->
+
                     <TextBlock Text="Mot de passe" Foreground="#607D8B" FontSize="12"/>
                     <TextBox Style="{StaticResource ModernTextBox}" 
                              Text="{Binding NewPassword}" 
                              Margin="0,5,0,10"/>
-                    <!-- URL -->
+
                     <TextBlock Text="URL du site" Foreground="#607D8B" FontSize="12"/>
                     <TextBox Style="{StaticResource ModernTextBox}" 
                              Text="{Binding NewURL}" 
                              Margin="0,5,0,10"/>
-                    <!-- Boutons de validation -->
+
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Annuler" 
                                 Command="{Binding ClosePopupCommand}" 
