@@ -24,6 +24,28 @@ namespace KryptIt.ViewModels
             }
         }
 
+        private bool _isDefaultViewVisible = true;
+        public bool IsDefaultViewVisible
+        {
+            get => _isDefaultViewVisible;
+            set
+            {
+                _isDefaultViewVisible = value;
+                OnPropertyChanged(nameof(IsDefaultViewVisible));
+            }
+        }
+
+        private bool _isSettingsWindowVisible = false;
+        public bool IsSettingsWindowVisible
+        {
+            get => _isSettingsWindowVisible;
+            set
+            {
+                _isSettingsWindowVisible = value;
+                OnPropertyChanged(nameof(IsSettingsWindowVisible));
+            }
+        }
+
         private string _searchText;
         public string SearchText
         {
@@ -82,7 +104,6 @@ namespace KryptIt.ViewModels
             }
         }
 
-        // Propriété pour gérer l'affichage de la pop-up
         private bool _isPopupOpen;
         public bool IsPopupOpen
         {
@@ -100,10 +121,10 @@ namespace KryptIt.ViewModels
         public ICommand CopyWebsiteCommand { get; }
         public ICommand DeleteCommand { get; }
         public ICommand AddPasswordCommand { get; }
-
-        // Commandes pour ouvrir et fermer la pop-up
         public ICommand OpenPopupCommand { get; }
         public ICommand ClosePopupCommand { get; }
+        public ICommand OpenSettingsCommand { get; }
+        public ICommand CloseSettingsCommand { get; }
 
         // Clé de chiffrement
         private const string EncryptionKey = "MaCleSecrete123456";
@@ -119,6 +140,9 @@ namespace KryptIt.ViewModels
 
             OpenPopupCommand = new RelayCommand(o => IsPopupOpen = true);
             ClosePopupCommand = new RelayCommand(o => IsPopupOpen = false);
+
+            OpenSettingsCommand = new RelayCommand(o => OpenSettings());
+            CloseSettingsCommand = new RelayCommand(o => CloseSettings());
 
             AllPasswords = new ObservableCollection<PasswordEntry>();
             FilteredPasswords = new ObservableCollection<PasswordEntry>();
@@ -136,7 +160,7 @@ namespace KryptIt.ViewModels
                     System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                     {
                         FileName = SelectedPassword.SiteName,
-                        UseShellExecute = true // Utilise le navigateur par défaut
+                        UseShellExecute = true
                     });
                 }
                 catch (Exception ex)
@@ -218,7 +242,6 @@ namespace KryptIt.ViewModels
 
             ExecuteSearch();
 
-            // Réinitialisation des champs et fermeture de la pop-up
             NewAccount = string.Empty;
             NewPassword = string.Empty;
             NewURL = string.Empty;
@@ -239,6 +262,18 @@ namespace KryptIt.ViewModels
                 var filtered = AllPasswords.Where(p => p.Login.IndexOf(SearchText, StringComparison.InvariantCultureIgnoreCase) >= 0);
                 FilteredPasswords = new ObservableCollection<PasswordEntry>(filtered);
             }
+        }
+
+        private void OpenSettings()
+        {
+            IsDefaultViewVisible = false;
+            IsSettingsWindowVisible = true;
+        }
+
+        private void CloseSettings()
+        {
+            IsSettingsWindowVisible = false;
+            IsDefaultViewVisible = true;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

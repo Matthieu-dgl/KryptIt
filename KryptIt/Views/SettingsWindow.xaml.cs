@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace KryptIt.Views
 {
-    public partial class MainWindow : Window
+    public partial class SettingsWindow : UserControl
     {
-        public MainWindow()
+        public SettingsWindow()
         {
             InitializeComponent();
         }

@@ -4,15 +4,17 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:vm="clr-namespace:KryptIt.ViewModels"
         xmlns:conv="clr-namespace:KryptIt.Converter"
-        Title="KryptIt"
-        Width="1000" Height="600"
+        xmlns:views="clr-namespace:KryptIt.Views"
+        Title="KryptIt" Width="1000" Height="600"
         Background="#F7F7F7"
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
+        <!-- Converters -->
         <conv:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 
-        <!-- Ressources Design Sidebar et Header -->
+        <!-- Styles pour Sidebar et Header -->
         <Style x:Key="SidebarItemTextStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Margin" Value="10,5,0,5"/>
@@ -25,7 +27,7 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
 
-        <!-- Styles pour les contrôles modernes (empruntés du 2e code) -->
+        <!-- Styles généraux -->
         <Style x:Key="ModernTextBox" TargetType="TextBox">
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Padding" Value="10"/>
@@ -45,13 +47,13 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}" 
-                        BorderBrush="{TemplateBinding BorderBrush}" 
-                        BorderThickness="1"
-                        CornerRadius="15"
-                            Padding="{TemplateBinding Padding}">
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="1"
+                                CornerRadius="15"
+                                Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center"
-                                     VerticalAlignment="Center"
-                                     RecognizesAccessKey="True"/>
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True"/>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -62,18 +64,12 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
         </Style>
-        <Style x:Key="SearchTextBox" TargetType="TextBox" BasedOn="{StaticResource ModernTextBox}">
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Padding" Value="10"/>
-        </Style>
         <Style x:Key="WatermarkTextBox" TargetType="TextBox">
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
                         <Grid>
-                            <!-- Contenu de la zone de texte -->
                             <ScrollViewer x:Name="PART_ContentHost"/>
-                            <!-- Watermark affiché lorsque le TextBox est vide -->
                             <TextBlock Text="Search"
                                        Foreground="Gray"
                                        Margin="5,0,0,0"
@@ -87,7 +83,7 @@
         </Style>
     </Window.Resources>
 
-    <!-- Affectation du ViewModel pour les bindings -->
+    <!-- Lier le DataContext au MainViewModel -->
     <Window.DataContext>
         <vm:MainViewModel/>
     </Window.DataContext>
@@ -109,11 +105,7 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Orientation="Horizontal" Grid.Column="0" VerticalAlignment="Center">
-                    <materialDesign:PackIcon Kind="Lock"
-                                 Width="24"
-                                 Height="24"
-                                 Foreground="Black"
-                                 Margin="0,0,5,0"/>
+                    <materialDesign:PackIcon Kind="Lock" Width="24" Height="24" Foreground="Black" Margin="0,0,5,0"/>
                     <TextBlock Text="KryptIt" Style="{StaticResource HeaderTextStyle}" />
                 </StackPanel>
 
@@ -132,184 +124,162 @@
                     </Button.Content>
                 </Button>
 
-                <materialDesign:PackIcon Kind="Account"
-                             Width="24"
-                             Height="24"
-                             Foreground="Black"
-                             HorizontalAlignment="Right"
-                             VerticalAlignment="Center"
-                             Grid.Column="3"
-                             Margin="20,0,10,0"/>
+                <materialDesign:PackIcon Kind="Account" Width="24" Height="24" Foreground="Black" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="3" Margin="20,0,10,0"/>
             </Grid>
         </Border>
 
         <!-- CONTENU PRINCIPAL -->
         <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+            <!-- Vue par défaut : Sidebar + MainContent -->
+            <Grid x:Name="DefaultContent"
+                  Visibility="{Binding IsDefaultViewVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-            <!-- SIDEBAR -->
-            <Border Grid.Column="0"
-                Background="White"
-                BorderBrush="#E0E0E0"
-                BorderThickness="0,1,1,0">
-                <Grid>
-                    <!-- Définir deux lignes : une pour le contenu, une autre pour le bouton -->
+                <!-- Sidebar -->
+                <Border Grid.Column="0" Background="White" BorderBrush="#E0E0E0" BorderThickness="0,1,1,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0">
+                            <TextBlock Text="Tags" Margin="10,15,0,5" FontWeight="Bold" FontSize="14" Foreground="Black"/>
+                            <StackPanel Margin="10,0,0,0">
+                                <TextBlock Text="Work" Style="{StaticResource SidebarItemTextStyle}"/>
+                                <TextBlock Text="Personal" Style="{StaticResource SidebarItemTextStyle}"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Bouton Settings en bas -->
+                        <Button Grid.Row="2"
+                                Command="{Binding OpenSettingsCommand}"
+                                Style="{StaticResource PrimaryButton}"
+                                Margin="10,10,10,20"
+                                VerticalAlignment="Bottom">
+                            <Button.Content>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="Settings" Width="20" Height="20" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Settings" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button.Content>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- MainContent : Recherche et Tableau -->
+                <Grid Grid.Column="1" Margin="20">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <!-- Contenu du haut -->
-                        <RowDefinition Height="*" />
-                        <!-- Espace flexible -->
-                        <RowDefinition Height="Auto"/>
-                        <!-- Bouton en bas -->
+                        <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Contenu du haut (Settings et Folders) -->
-                    <StackPanel Grid.Row="0">
-                        <TextBlock Text="Tags"
-                                   Margin="10,15,0,5"
-                                   FontWeight="Bold"
-                                   FontSize="14"
-                                   Foreground="Black"/>
-                        <StackPanel Margin="10,0,0,0">
-                            <TextBlock Text="Work" Style="{StaticResource SidebarItemTextStyle}"/>
-                            <TextBlock Text="Personal" Style="{StaticResource SidebarItemTextStyle}"/>
-                        </StackPanel>
-                    </StackPanel>
-                    <Button Grid.Row="2"
-                            Command="{Binding OpenSettingsCommand}"
-                            Style="{StaticResource PrimaryButton}"
-                            Margin="10,10,10,20"
-                            VerticalAlignment="Bottom">
-                        <Button.Content>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <materialDesign:PackIcon Kind="Settings" Width="20" Height="20" Margin="0,0,10,0"/>
-                                <TextBlock Text="Settings" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Button.Content>
-                    </Button>
-
-                </Grid>
-            </Border>
-
-
-            <!-- MAIN CONTENT (Recherche et liste des mots de passe) -->
-            <Grid Grid.Column="1" Margin="20">
-                <Grid.RowDefinitions>
-                    <!-- Section Recherche -->
-                    <RowDefinition Height="Auto"/>
-                    <!-- Liste des mots de passe -->
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <!-- Section Recherche -->
-                <Border Grid.Row="0" 
-                    Background="White"
-                    CornerRadius="5"
-                    Margin="0 0 0 10"
-                    BorderThickness="1"
-                    BorderBrush="#E0E0E0"
-                    Height="40">
-                    <Grid>
-                        <!-- Icône de loupe -->
-                        <materialDesign:PackIcon Kind="Magnify"
+                    <!-- Zone de Recherche -->
+                    <Border Grid.Row="0" Height="40" Background="White" CornerRadius="5" Margin="0 0 0 10" BorderThickness="1" BorderBrush="#E0E0E0">
+                        <Grid>
+                            <!-- Icône de loupe -->
+                            <materialDesign:PackIcon Kind="Magnify"
                                  Width="16"
                                  Height="16"
                                  HorizontalAlignment="Left"
                                  VerticalAlignment="Center"
                                  Margin="10,0,0,0" />
 
-                        <!-- La TextBox -->
-                        <TextBox Style="{StaticResource WatermarkTextBox}" 
-                            Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                            FontSize="14"
-                            VerticalContentAlignment="Center"
-                            VerticalAlignment="Center"
-                            Padding="3 0 0 0"
-                            Margin="25 0 0 0" />
-                    </Grid>
-                </Border>
+                            <!-- La TextBox -->
+                            <TextBox Style="{StaticResource WatermarkTextBox}" 
+                                Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                FontSize="14"
+                                VerticalContentAlignment="Center"
+                                VerticalAlignment="Center"
+                                Padding="3 0 0 0"
+                                Margin="25 0 0 0" />
+                        </Grid>
+                    </Border>
 
+                    <!-- Tableau des mots de passe -->
+                    <Border Grid.Row="1" Background="White" CornerRadius="5" BorderThickness="1" BorderBrush="#E0E0E0">
+                        <ListView ItemsSource="{Binding FilteredPasswords}"
+                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                  Style="{StaticResource ModernListView}"
+                                  SelectedItem="{Binding SelectedPassword}">
+                            <ListView.Resources>
+                                <ContextMenu x:Key="ItemContextMenu">
+                                    <MenuItem Header="Open in new Tab" Command="{Binding DataContext.OpenInNewTabCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                    <Separator/>
+                                    <MenuItem Header="Copy Username" Command="{Binding DataContext.CopyUsernameCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                    <MenuItem Header="Copy Password" Command="{Binding DataContext.CopyPasswordCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                    <MenuItem Header="Copy Website" Command="{Binding DataContext.CopyWebsiteCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                    <Separator/>
+                                    <MenuItem Header="Delete" Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                </ContextMenu>
+                                <ContextMenu x:Key="EmptyAreaContextMenu">
+                                    <MenuItem Header="Add an entry" Command="{Binding OpenPopupCommand}" />
+                                </ContextMenu>
+                            </ListView.Resources>
+                            <ListView.ContextMenu>
+                                <StaticResource ResourceKey="EmptyAreaContextMenu"/>
+                            </ListView.ContextMenu>
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="ContextMenu" Value="{StaticResource ItemContextMenu}"/>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.InputBindings>
+                                <KeyBinding Key="Delete" Command="{Binding DeleteCommand}" />
+                            </ListView.InputBindings>
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Header="URL" Width="180">
+                                        <GridViewColumn.HeaderTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="URL" FontWeight="SemiBold" Foreground="#455A64"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.HeaderTemplate>
+                                        <GridViewColumn.DisplayMemberBinding>
+                                            <Binding Path="SiteName"/>
+                                        </GridViewColumn.DisplayMemberBinding>
+                                    </GridViewColumn>
+                                    <GridViewColumn Header="Compte" Width="150">
+                                        <GridViewColumn.DisplayMemberBinding>
+                                            <Binding Path="Login"/>
+                                        </GridViewColumn.DisplayMemberBinding>
+                                    </GridViewColumn>
+                                    <GridViewColumn Header="Mot de passe" Width="220">
+                                        <GridViewColumn.DisplayMemberBinding>
+                                            <Binding Path="EncryptedPassword"/>
+                                        </GridViewColumn.DisplayMemberBinding>
+                                    </GridViewColumn>
+                                    <GridViewColumn Header="Date" Width="140">
+                                        <GridViewColumn.DisplayMemberBinding>
+                                            <Binding Path="CreatedAt"/>
+                                        </GridViewColumn.DisplayMemberBinding>
+                                    </GridViewColumn>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+                    </Border>
+                </Grid>
+            </Grid>
 
-                <!-- Liste des mots de passe -->
-                <Border Grid.Row="1" 
-                        Background="White"
-                        CornerRadius="5"
-                        BorderThickness="1"
-                        BorderBrush="#E0E0E0">
-                    <ListView ItemsSource="{Binding FilteredPasswords}"
-                              ScrollViewer.VerticalScrollBarVisibility="Auto"
-                              Style="{StaticResource ModernListView}"
-                              SelectedItem="{Binding SelectedPassword}">
-                        <ListView.Resources>
-                            <ContextMenu x:Key="ItemContextMenu">
-                                <MenuItem Header="Open in new Tab" Command="{Binding DataContext.OpenInNewTabCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
-                                <Separator/>
-                                <MenuItem Header="Copy Username" Command="{Binding DataContext.CopyUsernameCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
-                                <MenuItem Header="Copy Password" Command="{Binding DataContext.CopyPasswordCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
-                                <MenuItem Header="Copy Website" Command="{Binding DataContext.CopyWebsiteCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
-                                <Separator/>
-                                <MenuItem Header="Delete" Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
-                            </ContextMenu>
-                            <ContextMenu x:Key="EmptyAreaContextMenu">
-                                <MenuItem Header="Add an entry" Command="{Binding OpenPopupCommand}" />
-                            </ContextMenu>
-                        </ListView.Resources>
-                        <ListView.ContextMenu>
-                            <StaticResource ResourceKey="EmptyAreaContextMenu"/>
-                        </ListView.ContextMenu>
-                        <ListView.ItemContainerStyle>
-                            <Style TargetType="ListViewItem">
-                                <Setter Property="ContextMenu" Value="{StaticResource ItemContextMenu}"/>
-                            </Style>
-                        </ListView.ItemContainerStyle>
-                        <ListView.InputBindings>
-                            <KeyBinding Key="Delete" Command="{Binding DeleteCommand}" />
-                        </ListView.InputBindings>
-                        <ListView.View>
-                            <GridView>
-                                <GridViewColumn Header="URL" Width="180">
-                                    <GridViewColumn.HeaderTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="URL" FontWeight="SemiBold" Foreground="#455A64"/>
-                                        </DataTemplate>
-                                    </GridViewColumn.HeaderTemplate>
-                                    <GridViewColumn.DisplayMemberBinding>
-                                        <Binding Path="SiteName"/>
-                                    </GridViewColumn.DisplayMemberBinding>
-                                </GridViewColumn>
-
-                                <GridViewColumn Header="Compte" Width="150">
-                                    <GridViewColumn.DisplayMemberBinding>
-                                        <Binding Path="Login"/>
-                                    </GridViewColumn.DisplayMemberBinding>
-                                </GridViewColumn>
-
-                                <GridViewColumn Header="Mot de passe" Width="220">
-                                    <GridViewColumn.DisplayMemberBinding>
-                                        <Binding Path="EncryptedPassword"/>
-                                    </GridViewColumn.DisplayMemberBinding>
-                                </GridViewColumn>
-
-                                <GridViewColumn Header="Date" Width="140">
-                                    <GridViewColumn.DisplayMemberBinding>
-                                        <Binding Path="CreatedAt"/>
-                                    </GridViewColumn.DisplayMemberBinding>
-                                </GridViewColumn>
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
-                </Border>
+            <!-- Vue des paramètres -->
+            <Grid x:Name="SettingsContent"
+                  Visibility="{Binding IsSettingsWindowVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                  HorizontalAlignment="Stretch" 
+                  VerticalAlignment="Stretch"
+                  Panel.ZIndex="1">
+                <views:SettingsWindow DataContext="{Binding}"/>
             </Grid>
         </Grid>
 
-        <!-- POP-UP -->
+        <!-- POP-UP pour ajouter un compte -->
         <Popup IsOpen="{Binding IsPopupOpen}" 
                Placement="Center" 
-               AllowsTransparency="True"
-               PopupAnimation="Fade"
+               AllowsTransparency="True" 
+               PopupAnimation="Fade" 
                StaysOpen="False">
             <Border Background="White" 
                     CornerRadius="5" 
@@ -341,18 +311,11 @@
                              Margin="0,5,0,10"/>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="Annuler" 
-                                Command="{Binding ClosePopupCommand}" 
-                                Style="{StaticResource PrimaryButton}" 
-                                Background="Gray"
-                                Margin="0,0,10,0"/>
-                        <Button Content="Ajouter" 
-                                Command="{Binding AddPasswordCommand}" 
-                                Style="{StaticResource PrimaryButton}"/>
+                        <Button Content="Annuler" Command="{Binding ClosePopupCommand}" Style="{StaticResource PrimaryButton}" Background="Gray" Margin="0,0,10,0"/>
+                        <Button Content="Ajouter" Command="{Binding AddPasswordCommand}" Style="{StaticResource PrimaryButton}"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
         </Popup>
-
     </Grid>
 </Window>

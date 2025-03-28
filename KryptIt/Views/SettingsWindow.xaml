@@ -1,0 +1,65 @@
+﻿<UserControl x:Class="KryptIt.Views.SettingsWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:KryptIt.ViewModels">
+    <UserControl.DataContext>
+        <vm:MainViewModel/>
+    </UserControl.DataContext>
+
+    <Grid Background="#F7F7F7">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="White" Padding="20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0" 
+                        Content="Retour" 
+                        Command="{Binding CloseSettingsCommand}"
+                        Background="Gray"/>
+
+                <TextBlock Grid.Column="1" 
+                           Text="Paramètres" 
+                           FontSize="18" 
+                           FontWeight="Bold" 
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- Contenu des paramètres -->
+        <StackPanel Grid.Row="1" Margin="20">
+            <TextBlock Text="Paramètres de l'application" 
+                       FontSize="16" 
+                       FontWeight="SemiBold" 
+                       Margin="0,0,0,20"/>
+
+            <!-- Exemple de paramètre -->
+            <StackPanel Margin="0,0,0,10">
+                <TextBlock Text="Thème" FontWeight="Medium" Margin="0,0,0,5"/>
+                <ComboBox>
+                    <ComboBoxItem IsSelected="True">Clair</ComboBoxItem>
+                    <ComboBoxItem>Sombre</ComboBoxItem>
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Exemple d'autre paramètre -->
+            <StackPanel Margin="0,0,0,10">
+                <TextBlock Text="Durée de conservation des mots de passe" FontWeight="Medium" Margin="0,0,0,5"/>
+                <ComboBox>
+                    <ComboBoxItem IsSelected="True">30 jours</ComboBoxItem>
+                    <ComboBoxItem>60 jours</ComboBoxItem>
+                    <ComboBoxItem>90 jours</ComboBoxItem>
+                </ComboBox>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

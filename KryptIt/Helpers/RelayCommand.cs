@@ -18,13 +18,11 @@ namespace KryptIt.Helpers
 
         public void Execute(object parameter) => _execute(parameter);
 
-        public event EventHandler CanExecuteChanged
+        public event EventHandler CanExecuteChanged;
+
+        public void RaiseCanExecuteChanged()
         {
-            add => CommandManager.RequerySuggested += value;
-            remove => CommandManager.RequerySuggested -= value;
+            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
-
-        public void RaiseCanExecuteChanged() => CommandManager.InvalidateRequerySuggested();
     }
-
 }
