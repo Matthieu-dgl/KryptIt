@@ -58,7 +58,6 @@ namespace KryptIt.ViewModels
             var user = _context.Users.SingleOrDefault(u => u.Username == Username && u.Password == Password);
             if (user != null)
             {
-                // Stocker l'utilisateur connecté dans SessionManager
                 SessionManager.CurrentUser = user;
 
                 Application.Current.Dispatcher.Invoke(() =>

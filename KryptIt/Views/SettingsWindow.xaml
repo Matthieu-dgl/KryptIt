@@ -2,64 +2,137 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:vm="clr-namespace:KryptIt.ViewModels">
-    <UserControl.DataContext>
-        <vm:MainViewModel/>
-    </UserControl.DataContext>
+             xmlns:vm="clr-namespace:KryptIt.ViewModels"
+             Background="White">
 
-    <Grid Background="#F7F7F7">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-        <!-- Header -->
-        <Border Grid.Row="0" Background="White" Padding="20">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <Button Grid.Column="0" 
-                        Content="Retour" 
-                        Command="{Binding CloseSettingsCommand}"
-                        Background="Gray"/>
-
-                <TextBlock Grid.Column="1" 
-                           Text="Paramètres" 
-                           FontSize="18" 
+        <!-- Side Navigation -->
+        <Border Grid.Column="0" Background="#F5F5F5">
+            <StackPanel Margin="20">
+                <TextBlock Text="KryptIt" 
+                           FontSize="20" 
                            FontWeight="Bold" 
-                           HorizontalAlignment="Center" 
-                           VerticalAlignment="Center"/>
-            </Grid>
+                           Margin="0,0,0,30"/>
+
+                <StackPanel>
+                    <Button Content="Profile Settings" 
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            Margin="0,0,0,10"
+                            HorizontalContentAlignment="Left"/>
+                    <Button Content="Logout" 
+                            Command="{Binding LogoutCommand}"
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            HorizontalContentAlignment="Left"/>
+                </StackPanel>
+            </StackPanel>
         </Border>
 
-        <!-- Contenu des paramètres -->
-        <StackPanel Grid.Row="1" Margin="20">
-            <TextBlock Text="Paramètres de l'application" 
-                       FontSize="16" 
-                       FontWeight="SemiBold" 
+        <!-- Main Settings Area -->
+        <Grid Grid.Column="1" Margin="30">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" 
+                       Text="Settings" 
+                       FontSize="24" 
+                       FontWeight="Bold" 
                        Margin="0,0,0,20"/>
 
-            <!-- Exemple de paramètre -->
-            <StackPanel Margin="0,0,0,10">
-                <TextBlock Text="Thème" FontWeight="Medium" Margin="0,0,0,5"/>
-                <ComboBox>
-                    <ComboBoxItem IsSelected="True">Clair</ComboBoxItem>
-                    <ComboBoxItem>Sombre</ComboBoxItem>
-                </ComboBox>
+            <StackPanel Grid.Row="1">
+                <!-- App Preferences -->
+                <TextBlock Text="App Preferences" 
+                           FontWeight="SemiBold" 
+                           Margin="0,0,0,10"/>
+
+                <StackPanel Margin="0,0,0,20">
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Enable Notifications" 
+                                   VerticalAlignment="Center"/>
+                        <ToggleButton Grid.Column="1" 
+                                      Style="{StaticResource MaterialDesignSwitchToggleButton}"/>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Dark Theme" 
+                                   VerticalAlignment="Center"/>
+                        <ToggleButton Grid.Column="1" 
+                                      Style="{StaticResource MaterialDesignSwitchToggleButton}"/>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Privacy Mode" 
+                                   VerticalAlignment="Center"/>
+                        <ToggleButton Grid.Column="1" 
+                                      Style="{StaticResource MaterialDesignSwitchToggleButton}"/>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Manage Folders -->
+                <TextBlock Text="Manage Folders" 
+                           FontWeight="SemiBold" 
+                           Margin="0,0,0,10"/>
+
+                <StackPanel>
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Work" VerticalAlignment="Center"/>
+                        <Button Grid.Column="1" 
+                                Content="Rename" 
+                                Style="{StaticResource MaterialDesignFlatButton}"/>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Personal" VerticalAlignment="Center"/>
+                        <Button Grid.Column="1" 
+                                Content="Rename" 
+                                Style="{StaticResource MaterialDesignFlatButton}"/>
+                    </Grid>
+
+                    <Button Content="Add New Folder" 
+                            Style="{StaticResource MaterialDesignRaisedButton}"
+                            Margin="0,10,0,0"/>
+                </StackPanel>
             </StackPanel>
 
-            <!-- Exemple d'autre paramètre -->
-            <StackPanel Margin="0,0,0,10">
-                <TextBlock Text="Durée de conservation des mots de passe" FontWeight="Medium" Margin="0,0,0,5"/>
-                <ComboBox>
-                    <ComboBoxItem IsSelected="True">30 jours</ComboBoxItem>
-                    <ComboBoxItem>60 jours</ComboBoxItem>
-                    <ComboBoxItem>90 jours</ComboBoxItem>
-                </ComboBox>
+            <!-- Action Buttons -->
+            <StackPanel Grid.Row="2" 
+                        Orientation="Horizontal" 
+                        HorizontalAlignment="Right" 
+                        Margin="0,20,0,0">
+                <Button Content="Cancel" 
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Margin="0,0,10,0"
+                        Command="{Binding CloseSettingsCommand}"/>
+                <Button Content="Save Changes" 
+                        Style="{StaticResource MaterialDesignRaisedButton}"/>
             </StackPanel>
-        </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>

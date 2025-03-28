@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Input;
 using KryptIt.Helpers;
 using KryptIt.Models;
+using KryptIt.Views;
 
 namespace KryptIt.ViewModels
 {
@@ -125,6 +126,7 @@ namespace KryptIt.ViewModels
         public ICommand ClosePopupCommand { get; }
         public ICommand OpenSettingsCommand { get; }
         public ICommand CloseSettingsCommand { get; }
+        public ICommand LogoutCommand { get; }
 
         // Clé de chiffrement
         private const string EncryptionKey = "MaCleSecrete123456";
@@ -146,6 +148,8 @@ namespace KryptIt.ViewModels
 
             AllPasswords = new ObservableCollection<PasswordEntry>();
             FilteredPasswords = new ObservableCollection<PasswordEntry>();
+
+            LogoutCommand = new RelayCommand(o => Logout());
 
             LoadPasswordsFromDatabase();
             ExecuteSearch();
@@ -206,6 +210,19 @@ namespace KryptIt.ViewModels
                 AllPasswords.Remove(SelectedPassword);
                 ExecuteSearch();
             }
+        }
+
+        private void Logout()
+        {
+            SessionManager.CurrentUser = null;
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                LoginWindow loginWindow = new LoginWindow();
+                loginWindow.Show();
+                Application.Current.MainWindow.Close();
+                Application.Current.MainWindow = loginWindow;
+            });
         }
 
         private void LoadPasswordsFromDatabase()
