@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace KryptIt.Views
 {
-    public partial class RegistrationWindow : Window
+    public partial class RegistrationWindow : UserControl
     {
         public RegistrationWindow()
         {

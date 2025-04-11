@@ -22,6 +22,30 @@ namespace KryptIt.ViewModels
         {
             _context = new AppDbContext();
             RegisterCommand = new RelayCommand(Register, CanRegister);
+
+            CloseRegistrationCommand = new RelayCommand(o => CloseRegistration());
+        }
+
+        private bool _isDefaultViewVisible = true;
+        public bool IsDefaultViewVisible
+        {
+            get => _isDefaultViewVisible;
+            set
+            {
+                _isDefaultViewVisible = value;
+                OnPropertyChanged(nameof(IsDefaultViewVisible));
+            }
+        }
+
+        private bool _isRegistrationWindowVisible = false;
+        public bool IsRegistrationWindowVisible
+        {
+            get => _isRegistrationWindowVisible;
+            set
+            {
+                _isRegistrationWindowVisible = value;
+                OnPropertyChanged(nameof(IsRegistrationWindowVisible));
+            }
         }
 
         public string Username
@@ -70,6 +94,8 @@ namespace KryptIt.ViewModels
 
         public ICommand RegisterCommand { get; }
 
+        public ICommand CloseRegistrationCommand { get; }
+
         private bool CanRegister(object parameter)
         {
             return !string.IsNullOrEmpty(Username) &&
@@ -104,6 +130,15 @@ namespace KryptIt.ViewModels
                 Application.Current.MainWindow.Close();
                 Application.Current.MainWindow = loginWindow;
             });
+        }
+
+        private void CloseRegistration()
+        {
+            if (Application.Current.MainWindow.DataContext is LoginViewModel loginViewModel)
+            {
+                loginViewModel.IsRegistrationWindowVisible = false;
+                loginViewModel.IsDefaultViewVisible = true;
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

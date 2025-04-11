@@ -16,11 +16,33 @@ namespace KryptIt.ViewModels
         private string _password;
         private readonly AppDbContext _context;
 
+        private bool _isDefaultViewVisible = true;
+        public bool IsDefaultViewVisible
+        {
+            get => _isDefaultViewVisible;
+            set
+            {
+                _isDefaultViewVisible = value;
+                OnPropertyChanged(nameof(IsDefaultViewVisible));
+            }
+        }
+
+        private bool _isRegistrationWindowVisible = false;
+        public bool IsRegistrationWindowVisible
+        {
+            get => _isRegistrationWindowVisible;
+            set
+            {
+                _isRegistrationWindowVisible = value;
+                OnPropertyChanged(nameof(IsRegistrationWindowVisible));
+            }
+        }
+
         public LoginViewModel()
         {
             _context = new AppDbContext();
             LoginCommand = new RelayCommand(Login, CanLogin);
-            OpenRegisterCommand = new RelayCommand(OpenRegister);
+            OpenRegisterCommand = new RelayCommand(o => OpenRegister());
         }
 
         public string Username
@@ -74,16 +96,10 @@ namespace KryptIt.ViewModels
             }
         }
 
-        private void OpenRegister(object parameter)
+        private void OpenRegister()
         {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                RegistrationWindow regWindow = new RegistrationWindow();
-                regWindow.Show();
-                // Optionnel : fermer la fenêtre de login
-                Application.Current.MainWindow.Close();
-                Application.Current.MainWindow = regWindow;
-            });
+            IsDefaultViewVisible = false;
+            IsRegistrationWindowVisible = true;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
