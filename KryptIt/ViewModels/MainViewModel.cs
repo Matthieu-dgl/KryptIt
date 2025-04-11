@@ -7,11 +7,21 @@ using System.Windows.Input;
 using KryptIt.Helpers;
 using KryptIt.Models;
 using KryptIt.Views;
+using WindowsInput;
+using WindowsInput.Native;
+using System.Runtime.InteropServices;
 
 namespace KryptIt.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
+
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
         public ObservableCollection<PasswordEntry> AllPasswords { get; set; }
 
         private ObservableCollection<PasswordEntry> _filteredPasswords;
@@ -127,6 +137,8 @@ namespace KryptIt.ViewModels
         public ICommand OpenSettingsCommand { get; }
         public ICommand CloseSettingsCommand { get; }
         public ICommand LogoutCommand { get; }
+        public ICommand AutoFillCommand { get; }
+
 
         // Clé de chiffrement
         private const string EncryptionKey = "MaCleSecrete123456";
@@ -151,8 +163,41 @@ namespace KryptIt.ViewModels
 
             LogoutCommand = new RelayCommand(o => Logout());
 
+            AutoFillCommand = new RelayCommand(o => AutoFill());
+
             LoadPasswordsFromDatabase();
             ExecuteSearch();
+        }
+
+        public void AutoFillLogin(string username, string password)
+        {
+            IntPtr hWnd = FindWindow("Chrome_WidgetWin_1", null);
+            if (hWnd != IntPtr.Zero)
+            {
+                SetForegroundWindow(hWnd);
+
+                var sim = new InputSimulator();
+
+                sim.Keyboard.TextEntry(username);
+                sim.Keyboard.KeyPress(VirtualKeyCode.TAB);
+
+                sim.Keyboard.TextEntry(password);
+                sim.Keyboard.KeyPress(VirtualKeyCode.RETURN);
+            }
+            else
+            {
+                MessageBox.Show("Navigateur non trouvé.");
+            }
+        }
+
+
+        private void AutoFill()
+        {
+            if (SelectedPassword != null)
+            {
+                string decryptedPassword = SecurityHelper.Decrypt(SelectedPassword.EncryptedPassword, EncryptionKey);
+                AutoFillLogin(SelectedPassword.Login, decryptedPassword);
+            }
         }
 
         private void OpenInNewTab()

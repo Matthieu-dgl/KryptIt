@@ -95,8 +95,8 @@
                     <!-- Tableau des mots de passe -->
                     <Border Background="White" CornerRadius="4" Padding="10">
                         <ListView ItemsSource="{Binding FilteredPasswords}" 
-          SelectedItem="{Binding SelectedPassword}"
-          Style="{StaticResource MaterialDesignListView}">
+                                  SelectedItem="{Binding SelectedPassword}"
+                                  Style="{StaticResource MaterialDesignListView}">
                             <ListView.Resources>
                                 <ContextMenu x:Key="ItemContextMenu">
                                     <MenuItem Header="Open in new Tab" Command="{Binding DataContext.OpenInNewTabCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
@@ -104,6 +104,8 @@
                                     <MenuItem Header="Copy Username" Command="{Binding DataContext.CopyUsernameCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
                                     <MenuItem Header="Copy Password" Command="{Binding DataContext.CopyPasswordCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
                                     <MenuItem Header="Copy Website" Command="{Binding DataContext.CopyWebsiteCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                    <Separator/>
+                                    <MenuItem Header="Auto-Fill" Command="{Binding DataContext.AutoFillCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
                                     <Separator/>
                                     <MenuItem Header="Delete" Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
                                 </ContextMenu>
