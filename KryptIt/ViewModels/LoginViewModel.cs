@@ -38,11 +38,23 @@ namespace KryptIt.ViewModels
             }
         }
 
+        private RegistrationViewModel _registrationViewModel;
+        public RegistrationViewModel RegistrationViewModel
+        {
+            get => _registrationViewModel;
+            set
+            {
+                _registrationViewModel = value;
+                OnPropertyChanged();
+            }
+        }
+
         public LoginViewModel()
         {
             _context = new AppDbContext();
             LoginCommand = new RelayCommand(Login, CanLogin);
             OpenRegisterCommand = new RelayCommand(o => OpenRegister());
+            RegistrationViewModel = new RegistrationViewModel(this);
         }
 
         public string Username
@@ -77,7 +89,7 @@ namespace KryptIt.ViewModels
 
         private void Login(object parameter)
         {
-            var user = _context.Users.SingleOrDefault(u => u.Username == Username && u.Password == Password);
+            var user = _context.User.SingleOrDefault(u => u.Username == Username && u.Password == Password);
             if (user != null)
             {
                 SessionManager.CurrentUser = user;

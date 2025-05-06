@@ -35,6 +35,7 @@ namespace KryptIt.ViewModels
             }
         }
 
+        
         private bool _isDefaultViewVisible = true;
         public bool IsDefaultViewVisible
         {
@@ -140,6 +141,7 @@ namespace KryptIt.ViewModels
         public ICommand AutoFillCommand { get; }
 
 
+
         // Clé de chiffrement
         private const string EncryptionKey = "MaCleSecrete123456";
 
@@ -151,6 +153,7 @@ namespace KryptIt.ViewModels
             CopyWebsiteCommand = new RelayCommand(o => CopyWebsite(), o => SelectedPassword != null);
             DeleteCommand = new RelayCommand(o => DeletePassword(), o => SelectedPassword != null);
             AddPasswordCommand = new RelayCommand(o => AddPassword(), o => !string.IsNullOrWhiteSpace(NewAccount) && !string.IsNullOrWhiteSpace(NewPassword));
+
 
             OpenPopupCommand = new RelayCommand(o => IsPopupOpen = true);
             ClosePopupCommand = new RelayCommand(o => IsPopupOpen = false);
@@ -281,7 +284,6 @@ namespace KryptIt.ViewModels
                 }
             }
         }
-
         public void AddPassword()
         {
             string encryptedPassword = SecurityHelper.Encrypt(NewPassword, EncryptionKey);
@@ -312,7 +314,6 @@ namespace KryptIt.ViewModels
             OnPropertyChanged(nameof(NewURL));
             IsPopupOpen = false;
         }
-
         public void ExecuteSearch()
         {
             if (string.IsNullOrWhiteSpace(SearchText))

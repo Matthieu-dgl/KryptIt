@@ -68,7 +68,7 @@
               HorizontalAlignment="Stretch" 
               VerticalAlignment="Stretch"
               Panel.ZIndex="1">
-            <views:RegistrationWindow DataContext="{Binding}"/>
+            <views:RegistrationWindow DataContext="{Binding RegistrationViewModel}"/>
         </Grid>
     </Grid>
 </Window>

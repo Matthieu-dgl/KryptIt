@@ -15,10 +15,10 @@ namespace KryptIt.Models
         }
 
         public DbSet<PasswordEntry> PasswordEntry { get; set; }
-        public DbSet<PasswordEntryTag> PasswordEntryTags { get; set; }
-        public DbSet<SharedPassword> SharedPasswords { get; set; }
-        public DbSet<User> Users { get; set; }
-        public DbSet<Tag> Tags { get; set; }
+        public DbSet<PasswordEntryTag> PasswordEntryTag { get; set; }
+        public DbSet<SharedPassword> SharedPassword { get; set; }
+        public DbSet<User> User { get; set; }
+        public DbSet<Tag> Tag { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

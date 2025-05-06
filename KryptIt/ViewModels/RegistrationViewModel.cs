@@ -18,13 +18,15 @@ namespace KryptIt.ViewModels
         private string _email;
         private readonly AppDbContext _context;
 
-        public RegistrationViewModel()
+        public RegistrationViewModel(LoginViewModel loginViewModel)
         {
             _context = new AppDbContext();
             RegisterCommand = new RelayCommand(Register, CanRegister);
-
             CloseRegistrationCommand = new RelayCommand(o => CloseRegistration());
+            _loginViewModel = loginViewModel;
         }
+
+        private readonly LoginViewModel _loginViewModel;
 
         private bool _isDefaultViewVisible = true;
         public bool IsDefaultViewVisible
@@ -108,7 +110,7 @@ namespace KryptIt.ViewModels
         private void Register(object parameter)
         {
             // Vérifier si l'utilisateur existe déjà
-            var existingUser = _context.Users.SingleOrDefault(u => u.Username == Username);
+            var existingUser = _context.User.SingleOrDefault(u => u.Username == Username);
             if (existingUser != null)
             {
                 MessageBox.Show("Username already exists.");
@@ -117,28 +119,41 @@ namespace KryptIt.ViewModels
 
             // Créer le nouvel utilisateur
             var user = new User { Username = Username, Password = Password, Email = Email };
-            _context.Users.Add(user);
-            _context.SaveChanges();
-
-            MessageBox.Show("Registration successful!");
-
-            // Retour à la page de login
-            Application.Current.Dispatcher.Invoke(() =>
+            try
             {
-                LoginWindow loginWindow = new LoginWindow();
-                loginWindow.Show();
-                Application.Current.MainWindow.Close();
-                Application.Current.MainWindow = loginWindow;
-            });
+                _context.User.Add(user);
+                _context.SaveChanges();
+                MessageBox.Show("Inscription réussie !");
+
+                // Retour à la page de login
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    LoginWindow loginWindow = new LoginWindow();
+                    loginWindow.Show();
+                    Application.Current.MainWindow.Close();
+                    Application.Current.MainWindow = loginWindow;
+                });
+            }
+            catch (System.Data.Entity.Validation.DbEntityValidationException ex)
+            {
+                // Gérer les erreurs de validation
+                var errorMessages = ex.EntityValidationErrors
+                    .SelectMany(e => e.ValidationErrors)
+                    .Select(e => e.ErrorMessage);
+
+                MessageBox.Show("Erreur de validation : " + string.Join("\n", errorMessages));
+            }
+            catch (Exception ex)
+            {
+                // Gérer d'autres erreurs
+                MessageBox.Show("Une erreur s'est produite lors de l'inscription : " + ex.Message);
+            }
         }
 
         private void CloseRegistration()
         {
-            if (Application.Current.MainWindow.DataContext is LoginViewModel loginViewModel)
-            {
-                loginViewModel.IsRegistrationWindowVisible = false;
-                loginViewModel.IsDefaultViewVisible = true;
-            }
+            _loginViewModel.IsRegistrationWindowVisible = false;
+            _loginViewModel.IsDefaultViewVisible = true;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

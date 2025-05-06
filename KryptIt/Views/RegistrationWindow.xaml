@@ -5,30 +5,27 @@
              xmlns:vm="clr-namespace:KryptIt.ViewModels"
              xmlns:helpers="clr-namespace:KryptIt.Helpers"
              Background="{DynamicResource MaterialDesignPaper}">
-    <UserControl.DataContext>
-        <vm:RegistrationViewModel />
-    </UserControl.DataContext>
     <Grid>
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="250">
             <!-- Logo et titre -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,20">
                 <materialDesign:PackIcon Kind="AccountPlus" Height="24" Width="24" Foreground="{DynamicResource MaterialDesignBody}" />
-                <TextBlock Text="Inscription" FontWeight="Bold" FontSize="16" Margin="5,0,0,0" Foreground="{DynamicResource MaterialDesignBody}" />
+                <TextBlock Text="Registration" FontWeight="Bold" FontSize="16" Margin="5,0,0,0" Foreground="{DynamicResource MaterialDesignBody}" />
             </StackPanel>
 
             <!-- Message d'inscription -->
-            <TextBlock Text="Créez un nouveau compte" FontSize="14" HorizontalAlignment="Center" Margin="0,0,0,10" Foreground="{DynamicResource MaterialDesignBody}" />
+            <TextBlock Text="Create a new account" FontSize="14" HorizontalAlignment="Center" Margin="0,0,0,10" Foreground="{DynamicResource MaterialDesignBody}" />
 
             <!-- Champ Username -->
             <TextBox Margin="0,0,0,10"
-                     materialDesign:HintAssist.Hint="Nom d'utilisateur"
+                     materialDesign:HintAssist.Hint="Username"
                      Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource MaterialDesignOutlinedTextBox}"
                      Padding="10" />
 
             <!-- Champ Password -->
             <PasswordBox Margin="0,0,0,10"
-                         materialDesign:HintAssist.Hint="Mot de passe"
+                         materialDesign:HintAssist.Hint="Password"
                          helpers:PasswordBoxHelper.BindPassword="True"
                          helpers:PasswordBoxHelper.BoundPassword="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          Style="{StaticResource MaterialDesignOutlinedPasswordBox}"
@@ -36,7 +33,7 @@
 
             <!-- Champ Confirm Password -->
             <PasswordBox Margin="0,0,0,10"
-                         materialDesign:HintAssist.Hint="Confirmez le mot de passe"
+                         materialDesign:HintAssist.Hint="Confirm password"
                          helpers:PasswordBoxHelper.BindPassword="True"
                          helpers:PasswordBoxHelper.BoundPassword="{Binding ConfirmPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          Style="{StaticResource MaterialDesignOutlinedPasswordBox}"
@@ -51,11 +48,11 @@
 
             <!-- Boutons Register et Annuler -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-                <Button Content="Annuler"
+                <Button Content="Cancel"
                         Command="{Binding CloseRegistrationCommand}"
                         Style="{StaticResource MaterialDesignFlatButton}"
                         Margin="0,0,10,0" />
-                <Button Content="S'inscrire"
+                <Button Content="Register"
                         Command="{Binding RegisterCommand}"
                         Style="{StaticResource MaterialDesignRaisedButton}"
                         IsDefault="True" />
