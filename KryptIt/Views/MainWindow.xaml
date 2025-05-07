@@ -45,7 +45,7 @@
                                 Style="{StaticResource MaterialDesignRaisedButton}" Margin="0,0,10,0">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="Plus" Width="20" Height="20" Margin="0,0,5,0"/>
-                                <TextBlock Text="Ajouter" VerticalAlignment="Center"/>
+                                <TextBlock Text="Add" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
                         <Button Style="{StaticResource MaterialDesignFlatButton}">
@@ -112,7 +112,7 @@
                                     <Separator/>
                                     <MenuItem Header="Auto-Fill" Command="{Binding DataContext.AutoFillCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
                                     <Separator/>
-                                    <MenuItem Header="Modify tags" Command="{Binding DataContext.OpenTagPopupCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                    <MenuItem Header="Edit tags" Command="{Binding DataContext.OpenTagPopupCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
                                     <Separator/>
                                     <MenuItem Header="Delete" Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
                                 </ContextMenu>
@@ -134,8 +134,8 @@
                             <ListView.View>
                                 <GridView>
                                     <GridViewColumn Header="URL" Width="180" DisplayMemberBinding="{Binding SiteName}" />
-                                    <GridViewColumn Header="Compte" Width="150" DisplayMemberBinding="{Binding Login}" />
-                                    <GridViewColumn Header="Mot de passe" Width="220" DisplayMemberBinding="{Binding EncryptedPassword}" />
+                                    <GridViewColumn Header="Account" Width="150" DisplayMemberBinding="{Binding Login}" />
+                                    <GridViewColumn Header="Password" Width="220" DisplayMemberBinding="{Binding EncryptedPassword}" />
                                     <GridViewColumn Header="Tags" Width="200" DisplayMemberBinding="{Binding TagNames}" />
                                     <GridViewColumn Header="Date" Width="140" DisplayMemberBinding="{Binding CreatedAt}" />
                                 </GridView>
@@ -152,24 +152,25 @@
                AllowsTransparency="True" 
                PopupAnimation="Fade" 
                StaysOpen="False"
+               Width="350"
                HorizontalAlignment="Center"
                VerticalAlignment="Center">
             <Border Background="White" CornerRadius="5" Padding="30" BorderBrush="#E0E0E0" BorderThickness="1">
                 <StackPanel>
-                    <TextBlock Text="Ajouter un nouveau compte" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+                    <TextBlock Text="Add a new account" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
                     <TextBox Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
-                             materialDesign:HintAssist.Hint="Nom du compte"
+                             materialDesign:HintAssist.Hint="Username"
                              Text="{Binding NewAccount}" Margin="0,10,0,10"/>
                     <TextBox Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
-                             materialDesign:HintAssist.Hint="Mot de passe"
+                             materialDesign:HintAssist.Hint="Password"
                              Text="{Binding NewPassword}" Margin="0,10,0,10"/>
                     <TextBox Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
-                             materialDesign:HintAssist.Hint="URL du site"
+                             materialDesign:HintAssist.Hint="Site URL"
                              Text="{Binding NewURL}" Margin="0,10,0,10"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-                        <Button Content="Annuler" Command="{Binding ClosePopupCommand}" 
+                        <Button Content="Cancel" Command="{Binding ClosePopupCommand}" 
                                 Style="{StaticResource MaterialDesignFlatButton}" Margin="0,0,10,0"/>
-                        <Button Content="Ajouter" Command="{Binding AddPasswordCommand}" 
+                        <Button Content="Add" Command="{Binding AddPasswordCommand}" 
                                 Style="{StaticResource MaterialDesignRaisedButton}"/>
                     </StackPanel>
                 </StackPanel>
@@ -178,45 +179,64 @@
         
         <!-- POP-UP pour ajouter un tag -->
         <Popup IsOpen="{Binding IsTagPopupOpen}" 
-           Placement="Center" 
-           AllowsTransparency="True" 
-           PopupAnimation="Fade" 
-           StaysOpen="False"
-           HorizontalAlignment="Center"
-           VerticalAlignment="Center">
+                Placement="Center" 
+                AllowsTransparency="True" 
+                PopupAnimation="Fade" 
+                StaysOpen="False"
+                Width="350"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
             <Border Background="White" CornerRadius="5" Padding="30" BorderBrush="#E0E0E0" BorderThickness="1">
                 <StackPanel>
-                    <TextBlock Text="Gérer les Tags" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+                    <TextBlock Text="Edit tags" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
 
                     <!-- Ajouter un tag -->
                     <ComboBox ItemsSource="{Binding AvailableTags}" 
-                      SelectedItem="{Binding SelectedTag}" 
-                      DisplayMemberPath="TagName" 
-                      Style="{StaticResource MaterialDesignComboBox}" 
-                      Margin="0,0,0,10"/>
-                    <Button Content="Ajouter Tag" 
-                    Command="{Binding AddTagCommand}" 
-                    Style="{StaticResource MaterialDesignRaisedButton}" 
-                    Margin="0,0,0,10"/>
+                              SelectedItem="{Binding SelectedTag}" 
+                              DisplayMemberPath="TagName" 
+                              Style="{StaticResource MaterialDesignComboBox}" 
+                              Margin="0,0,0,10"/>
+                    <Button Content="Add tag" 
+                            Command="{Binding AddTagCommand}" 
+                            Style="{StaticResource MaterialDesignRaisedButton}" 
+                            Margin="0,0,0,10"/>
 
                     <!-- Liste des tags associés -->
-                    <TextBlock Text="Tags associés" FontSize="14" FontWeight="Bold" Margin="0,10,0,5"/>
-                    <ListBox ItemsSource="{Binding SelectedPassword.PasswordEntryTag}" 
-                     Style="{StaticResource MaterialDesignListBox}" 
-                     Margin="0,0,0,10">
+                    <TextBlock Text="Currents tags" FontSize="14" FontWeight="Bold" Margin="0,10,0,5"/>
+                    <ListBox ItemsSource="{Binding SelectedPassword.PasswordEntryTag}"
+                             Style="{StaticResource MaterialDesignListBox}"
+                             Margin="0,0,0,10">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Tag.TagName}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                    <Button Content="Supprimer" 
-                                    Command="{Binding DataContext.RemoveTagCommand, RelativeSource={RelativeSource AncestorType=Popup}}" 
-                                    CommandParameter="{Binding}" 
-                                    Style="{StaticResource MaterialDesignFlatButton}" />
-                                </StackPanel>
+                                <Grid Width="300">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="240"/>
+                                        <ColumnDefinition Width="30"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Texte du tag -->
+                                    <TextBlock Text="{Binding Tag.TagName}"
+                                               VerticalAlignment="Center"
+                                               Grid.Column="0"
+                                               TextTrimming="CharacterEllipsis"/>
+                                    <Button Command="{Binding DataContext.RemoveTagCommand, RelativeSource={RelativeSource AncestorType=Popup}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource MaterialDesignFlatButton}"
+                                            Width="30" Height="30"
+                                            Padding="0"
+                                            Grid.Column="1"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            ToolTip="Supprimer le tag">
+                                        <materialDesign:PackIcon Kind="Delete"
+                                                                Width="20" Height="20"
+                                                                VerticalAlignment="Center"
+                                                                HorizontalAlignment="Center"/>
+                                    </Button>
+                                </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
                         <Button Content="Fermer" Command="{Binding CloseTagPopupCommand}" 
                         Style="{StaticResource MaterialDesignFlatButton}" Margin="0,0,10,0"/>

@@ -84,7 +84,13 @@
     <Reference Include="MySql.Data.EntityFramework, Version=8.0.21.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <HintPath>..\packages\MySql.Data.EntityFramework.8.0.21\lib\net452\MySql.Data.EntityFramework.dll</HintPath>
     </Reference>
+    <Reference Include="Otp.NET, Version=1.4.0.0, Culture=neutral, PublicKeyToken=38a48df817e173a6, processorArchitecture=MSIL">
+      <HintPath>..\packages\Otp.NET.1.4.0\lib\net461\Otp.NET.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationFramework.Aero2" />
+    <Reference Include="QRCoder, Version=1.6.0.0, Culture=neutral, PublicKeyToken=c4ed5b9ae8358a28, processorArchitecture=MSIL">
+      <HintPath>..\packages\QRCoder.1.6.0\lib\net40\QRCoder.dll</HintPath>
+    </Reference>
     <Reference Include="Renci.SshNet, Version=2016.1.0.0, Culture=neutral, PublicKeyToken=1cee9f8bde3db106, processorArchitecture=MSIL">
       <HintPath>..\packages\SSH.NET.2016.1.0\lib\net40\Renci.SshNet.dll</HintPath>
     </Reference>
@@ -163,11 +169,15 @@
     <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\RegistrationViewModel.cs" />
+    <Compile Include="ViewModels\TwoFactorViewModel.cs" />
     <Compile Include="Views\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\RegistrationWindow.xaml.cs">
       <DependentUpon>RegistrationWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TwoFactorWindow.xaml.cs">
+      <DependentUpon>TwoFactorWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="Views\LoginWindow.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
@@ -194,6 +204,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Views\RegistrationWindow.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </Page>
+    <Page Include="Views\TwoFactorWindow.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </Page>
   </ItemGroup>

@@ -4,12 +4,17 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using System.IO;
 using KryptIt.Helpers;
 using KryptIt.Models;
 using KryptIt.Views;
 using WindowsInput;
 using WindowsInput.Native;
 using System.Runtime.InteropServices;
+using OtpNet;
+using QRCoder;
+using System.Drawing;
+using System.Windows.Media.Imaging;
 
 namespace KryptIt.ViewModels
 {
@@ -114,6 +119,59 @@ namespace KryptIt.ViewModels
             }
         }
 
+        private bool _isTwoFactorEnabled;
+        public bool IsTwoFactorEnabled
+        {
+            get => _isTwoFactorEnabled;
+            set
+            {
+                _isTwoFactorEnabled = value;
+                OnPropertyChanged(nameof(IsTwoFactorEnabled));
+
+                if (_isTwoFactorEnabled && string.IsNullOrEmpty(TwoFactorSecret))
+                {
+                    using (var context = new AppDbContext())
+                    {
+                        var user = context.User.FirstOrDefault(u => u.Id == SessionManager.CurrentUser.Id);
+                        if (user != null && !string.IsNullOrEmpty(user.TwoFactorSecret))
+                        {
+                            TwoFactorSecret = user.TwoFactorSecret;
+                        }
+                        else
+                        {
+                            GenerateTwoFactorSecret();
+                        }
+                    }
+                }
+                else if (!_isTwoFactorEnabled)
+                {
+                    DisableTwoFactorAuthentication();
+                }
+            }
+        }
+
+        private string _twoFactorSecret;
+        public string TwoFactorSecret
+        {
+            get => _twoFactorSecret;
+            set
+            {
+                _twoFactorSecret = value;
+                OnPropertyChanged(nameof(TwoFactorSecret));
+            }
+        }
+
+        private BitmapImage _qrCodeImageSource;
+        public BitmapImage QrCodeImageSource
+        {
+            get => _qrCodeImageSource;
+            set
+            {
+                _qrCodeImageSource = value;
+                OnPropertyChanged(nameof(QrCodeImageSource));
+            }
+        }
+
         private string _searchText;
         public string SearchText
         {
@@ -201,6 +259,8 @@ namespace KryptIt.ViewModels
         public ICommand CloseTagPopupCommand { get; }
         public ICommand RemoveTagCommand { get; }
 
+        public ICommand SaveSettingsCommand { get; }
+
         // Clé de chiffrement
         private const string EncryptionKey = "MaCleSecrete123456";
 
@@ -225,6 +285,7 @@ namespace KryptIt.ViewModels
 
             OpenSettingsCommand = new RelayCommand(o => OpenSettings());
             CloseSettingsCommand = new RelayCommand(o => CloseSettings());
+            SaveSettingsCommand = new RelayCommand(o => SaveSettings());
 
             AllPasswords = new ObservableCollection<PasswordEntry>();
             FilteredPasswords = new ObservableCollection<PasswordEntry>();
@@ -235,7 +296,81 @@ namespace KryptIt.ViewModels
 
             LoadPasswordsFromDatabase();
             LoadAvailableTags();
+            LoadUserSettings();
             ExecuteSearch();
+        }
+
+        private void LoadUserSettings()
+        {
+            // Check if current user has 2FA enabled
+            using (var context = new AppDbContext())
+            {
+                var user = context.User.FirstOrDefault(u => u.Id == SessionManager.CurrentUser.Id);
+                if (user != null)
+                {
+                    IsTwoFactorEnabled = user.TwoFactorEnabled;
+                    if (IsTwoFactorEnabled && !string.IsNullOrEmpty(user.TwoFactorSecret))
+                    {
+                        TwoFactorSecret = user.TwoFactorSecret;
+                        GenerateQrCodeFromSecret(TwoFactorSecret);
+                    }
+                }
+            }
+        }
+
+        private void GenerateQrCodeFromSecret(string secret)
+        {
+            if (string.IsNullOrEmpty(secret))
+                return;
+
+            try
+            {
+                // Generate the URI for the QR code
+                string issuer = "KryptIt";
+                string uri = $"otpauth://totp/{Uri.EscapeDataString(issuer)}:{Uri.EscapeDataString(SessionManager.CurrentUser.Username)}?secret={secret}&issuer={Uri.EscapeDataString(issuer)}";
+
+                // Generate the QR code
+                QRCodeGenerator qrGenerator = new QRCodeGenerator();
+                QRCodeData qrCodeData = qrGenerator.CreateQrCode(uri, QRCodeGenerator.ECCLevel.Q);
+                QRCode qrCode = new QRCode(qrCodeData);
+
+                // Convert the QR code to an image
+                Bitmap qrCodeImage = qrCode.GetGraphic(20);
+
+                // Convert to BitmapImage for WPF
+                using (MemoryStream memory = new MemoryStream())
+                {
+                    qrCodeImage.Save(memory, System.Drawing.Imaging.ImageFormat.Png);
+                    memory.Position = 0;
+                    BitmapImage bitmapImage = new BitmapImage();
+                    bitmapImage.BeginInit();
+                    bitmapImage.StreamSource = memory;
+                    bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmapImage.EndInit();
+                    QrCodeImageSource = bitmapImage;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error generating QR code: {ex.Message}");
+            }
+        }
+
+        private void SaveSettings()
+        {
+            using (var context = new AppDbContext())
+            {
+                var user = context.User.FirstOrDefault(u => u.Id == SessionManager.CurrentUser.Id);
+                if (user != null)
+                {
+                    user.TwoFactorEnabled = IsTwoFactorEnabled;
+                    user.TwoFactorSecret = TwoFactorSecret;
+                    context.SaveChanges();
+                    MessageBox.Show("Settings saved successfully.");
+                }
+            }
+
+            CloseSettings();
         }
 
         public void AutoFillLogin(string username, string password)
@@ -328,6 +463,42 @@ namespace KryptIt.ViewModels
 
                 AllPasswords.Remove(SelectedPassword);
                 ExecuteSearch();
+            }
+        }
+
+        private void GenerateTwoFactorSecret()
+        {
+            // Generate a unique secret
+            var key = KeyGeneration.GenerateRandomKey(20);
+            TwoFactorSecret = Base32Encoding.ToString(key);
+
+            // Generate QR code from the secret
+            GenerateQrCodeFromSecret(TwoFactorSecret);
+
+            // Update the user in the database
+            using (var context = new AppDbContext())
+            {
+                var user = context.User.FirstOrDefault(u => u.Id == SessionManager.CurrentUser.Id);
+                if (user != null)
+                {
+                    user.TwoFactorSecret = TwoFactorSecret;
+                    context.SaveChanges();
+                }
+            }
+        }
+
+        private void DisableTwoFactorAuthentication()
+        {
+            // Désactiver la 2FA pour l'utilisateur
+            using (var context = new AppDbContext())
+            {
+                var user = context.User.SingleOrDefault(u => u.Id == SessionManager.CurrentUser.Id);
+                if (user != null)
+                {
+                    user.TwoFactorEnabled = false;
+                    user.TwoFactorSecret = null;
+                    context.SaveChanges();
+                }
             }
         }
 

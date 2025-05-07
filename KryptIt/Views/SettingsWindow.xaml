@@ -5,6 +5,10 @@
              xmlns:vm="clr-namespace:KryptIt.ViewModels"
              Background="White">
 
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    </UserControl.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250"/>
@@ -58,29 +62,35 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Enable Notifications" 
+                        <TextBlock Text="Enable Two-Factor Authentication" 
                                    VerticalAlignment="Center"/>
                         <ToggleButton Grid.Column="1" 
+                                      IsChecked="{Binding IsTwoFactorEnabled}"
                                       Style="{StaticResource MaterialDesignSwitchToggleButton}"/>
                     </Grid>
+
+                    <!-- QR Code display when 2FA is enabled -->
+                    <Border Visibility="{Binding IsTwoFactorEnabled, Converter={StaticResource BoolToVisibilityConverter}}"
+                            BorderBrush="#E0E0E0" BorderThickness="1" Margin="0,10,0,10" Padding="10">
+                        <StackPanel>
+                            <TextBlock Text="Scan this QR code with your authenticator app" 
+                                      Margin="0,0,0,10"/>
+                            <Image x:Name="QrCodeImage" Width="200" Height="200" Margin="0,0,0,10"
+                                  Source="{Binding QrCodeImageSource}"/>
+                            <TextBlock Text="Or enter this code manually:" Margin="0,0,0,5"/>
+                            <TextBox IsReadOnly="True" Text="{Binding TwoFactorSecret, Mode=OneWay}"
+                                    Margin="0,0,0,10"/>
+                            <TextBlock Text="We recommend using Google Authenticator, Microsoft Authenticator, Authy, or similar apps."
+                                      TextWrapping="Wrap" Margin="0,0,0,10" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
 
                     <Grid Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Dark Theme" 
-                                   VerticalAlignment="Center"/>
-                        <ToggleButton Grid.Column="1" 
-                                      Style="{StaticResource MaterialDesignSwitchToggleButton}"/>
-                    </Grid>
-
-                    <Grid Margin="0,0,0,10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Privacy Mode" 
+                        <TextBlock Text="Dark Theme (disabled for now)" 
                                    VerticalAlignment="Center"/>
                         <ToggleButton Grid.Column="1" 
                                       Style="{StaticResource MaterialDesignSwitchToggleButton}"/>
@@ -131,6 +141,7 @@
                         Margin="0,0,10,0"
                         Command="{Binding CloseSettingsCommand}"/>
                 <Button Content="Save Changes" 
+                        Command="{Binding SaveSettingsCommand}"
                         Style="{StaticResource MaterialDesignRaisedButton}"/>
             </StackPanel>
         </Grid>

@@ -92,15 +92,33 @@ namespace KryptIt.ViewModels
             var user = _context.User.SingleOrDefault(u => u.Username == Username && u.Password == Password);
             if (user != null)
             {
-                SessionManager.CurrentUser = user;
-
-                Application.Current.Dispatcher.Invoke(() =>
+                // Check if 2FA is enabled for this user
+                if (user.TwoFactorEnabled && !string.IsNullOrEmpty(user.TwoFactorSecret))
                 {
-                    MainWindow mainWindow = new MainWindow();
-                    mainWindow.Show();
-                    Application.Current.MainWindow.Close();
-                    Application.Current.MainWindow = mainWindow;
-                });
+                    // Open 2FA verification window
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        TwoFactorWindow twoFactorWindow = new TwoFactorWindow();
+                        var viewModel = twoFactorWindow.DataContext as TwoFactorViewModel;
+                        viewModel.SetUser(user);
+                        twoFactorWindow.Show();
+
+                        // Don't close the current window yet, it will be closed after successful 2FA
+                    });
+                }
+                else
+                {
+                    // No 2FA required, proceed to main window
+                    SessionManager.CurrentUser = user;
+
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        MainWindow mainWindow = new MainWindow();
+                        mainWindow.Show();
+                        Application.Current.MainWindow.Close();
+                        Application.Current.MainWindow = mainWindow;
+                    });
+                }
             }
             else
             {
