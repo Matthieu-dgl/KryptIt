@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace KryptIt.Models
 {
@@ -49,7 +51,12 @@ namespace KryptIt.Models
         [MaxLength(255)]
         public string OtpSecret { get; set; }
 
-        public ICollection<PasswordEntryTag> PasswordEntryTag { get; set; }
+        [NotMapped]
+        public string TagNames => PasswordEntryTag != null
+        ? string.Join(", ", PasswordEntryTag.Select(pet => pet.Tag.TagName))
+        : string.Empty;
+
+        public ObservableCollection<PasswordEntryTag> PasswordEntryTag { get; set; } = new ObservableCollection<PasswordEntryTag>();
 
         public ICollection<SharedPassword> SharedPassword { get; set; }
     }

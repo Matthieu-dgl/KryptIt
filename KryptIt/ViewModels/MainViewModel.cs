@@ -35,7 +35,52 @@ namespace KryptIt.ViewModels
             }
         }
 
-        
+        private ObservableCollection<Tag> _availableTags;
+        public ObservableCollection<Tag> AvailableTags
+        {
+            get => _availableTags;
+            set
+            {
+                _availableTags = value;
+                OnPropertyChanged(nameof(AvailableTags));
+            }
+        }
+
+        private ObservableCollection<Tag> _newEntryTags = new ObservableCollection<Tag>();
+        public ObservableCollection<Tag> NewEntryTags
+        {
+            get => _newEntryTags;
+            set
+            {
+                _newEntryTags = value;
+                OnPropertyChanged(nameof(NewEntryTags));
+            }
+        }
+
+        private Tag _selectedTag;
+        public Tag SelectedTag
+        {
+            get => _selectedTag;
+            set
+            {
+                _selectedTag = value;
+                OnPropertyChanged(nameof(SelectedTag));
+                ((RelayCommand)AddTagCommand).RaiseCanExecuteChanged();
+            }
+        }
+
+        private Tag _selectedFilterTag;
+        public Tag SelectedFilterTag
+        {
+            get => _selectedFilterTag;
+            set
+            {
+                _selectedFilterTag = value;
+                OnPropertyChanged(nameof(SelectedFilterTag));
+                FilterEntriesByTag();
+            }
+        }
+
         private bool _isDefaultViewVisible = true;
         public bool IsDefaultViewVisible
         {
@@ -55,6 +100,17 @@ namespace KryptIt.ViewModels
             {
                 _isSettingsWindowVisible = value;
                 OnPropertyChanged(nameof(IsSettingsWindowVisible));
+            }
+        }
+
+        private bool _isTagPopupOpen;
+        public bool IsTagPopupOpen
+        {
+            get => _isTagPopupOpen;
+            set
+            {
+                _isTagPopupOpen = value;
+                OnPropertyChanged(nameof(IsTagPopupOpen));
             }
         }
 
@@ -139,8 +195,11 @@ namespace KryptIt.ViewModels
         public ICommand CloseSettingsCommand { get; }
         public ICommand LogoutCommand { get; }
         public ICommand AutoFillCommand { get; }
-
-
+        public ICommand AddTagCommand { get; }
+        public ICommand AddTagToNewEntryCommand { get; }
+        public ICommand OpenTagPopupCommand { get; }
+        public ICommand CloseTagPopupCommand { get; }
+        public ICommand RemoveTagCommand { get; }
 
         // Clé de chiffrement
         private const string EncryptionKey = "MaCleSecrete123456";
@@ -153,10 +212,16 @@ namespace KryptIt.ViewModels
             CopyWebsiteCommand = new RelayCommand(o => CopyWebsite(), o => SelectedPassword != null);
             DeleteCommand = new RelayCommand(o => DeletePassword(), o => SelectedPassword != null);
             AddPasswordCommand = new RelayCommand(o => AddPassword(), o => !string.IsNullOrWhiteSpace(NewAccount) && !string.IsNullOrWhiteSpace(NewPassword));
-
+            
+            AddTagCommand = new RelayCommand(o => AddTagToPassword(), o => SelectedPassword != null && SelectedTag != null);
+            AddTagToNewEntryCommand = new RelayCommand(o => AddTagToNewEntry(), o => SelectedTag != null);
+            RemoveTagCommand = new RelayCommand(RemoveTagFromPassword);
 
             OpenPopupCommand = new RelayCommand(o => IsPopupOpen = true);
             ClosePopupCommand = new RelayCommand(o => IsPopupOpen = false);
+
+            OpenTagPopupCommand = new RelayCommand(o => IsTagPopupOpen = true, o => SelectedPassword != null);
+            CloseTagPopupCommand = new RelayCommand(o => IsTagPopupOpen = false);
 
             OpenSettingsCommand = new RelayCommand(o => OpenSettings());
             CloseSettingsCommand = new RelayCommand(o => CloseSettings());
@@ -169,6 +234,7 @@ namespace KryptIt.ViewModels
             AutoFillCommand = new RelayCommand(o => AutoFill());
 
             LoadPasswordsFromDatabase();
+            LoadAvailableTags();
             ExecuteSearch();
         }
 
@@ -192,14 +258,19 @@ namespace KryptIt.ViewModels
                 MessageBox.Show("Navigateur non trouvé.");
             }
         }
-
-
         private void AutoFill()
         {
             if (SelectedPassword != null)
             {
                 string decryptedPassword = SecurityHelper.Decrypt(SelectedPassword.EncryptedPassword, EncryptionKey);
                 AutoFillLogin(SelectedPassword.Login, decryptedPassword);
+            }
+        }
+        private void AddTagToNewEntry()
+        {
+            if (SelectedTag != null && !NewEntryTags.Contains(SelectedTag))
+            {
+                NewEntryTags.Add(SelectedTag);
             }
         }
 
@@ -277,13 +348,25 @@ namespace KryptIt.ViewModels
         {
             using (var context = new AppDbContext())
             {
-                var passwords = context.PasswordEntry.Where(p => p.UserId == SessionManager.CurrentUser.Id).ToList();
-                foreach (var password in passwords)
-                {
-                    AllPasswords.Add(password);
-                }
+                var passwords = context.PasswordEntry
+                    .Include("PasswordEntryTag.Tag")
+                    .Where(p => p.UserId == SessionManager.CurrentUser.Id)
+                    .ToList();
+
+                AllPasswords = new ObservableCollection<PasswordEntry>(passwords);
             }
         }
+
+        private void LoadAvailableTags()
+        {
+            using (var context = new AppDbContext())
+            {
+                var tags = context.Tag.ToList();
+                tags.Insert(0, new Tag { Id = 0, TagName = "All" });
+                AvailableTags = new ObservableCollection<Tag>(tags);
+            }
+        }
+
         public void AddPassword()
         {
             string encryptedPassword = SecurityHelper.Encrypt(NewPassword, EncryptionKey);
@@ -296,24 +379,118 @@ namespace KryptIt.ViewModels
                 CreatedAt = DateTime.Now
             };
 
-            AllPasswords.Add(entry);
-
             using (var context = new AppDbContext())
             {
                 context.PasswordEntry.Add(entry);
                 context.SaveChanges();
+
+                foreach (var tag in NewEntryTags)
+                {
+                    var passwordEntryTag = new PasswordEntryTag
+                    {
+                        PasswordEntryId = entry.Id,
+                        TagId = tag.Id
+                    };
+                    context.PasswordEntryTag.Add(passwordEntryTag);
+                }
+
+                context.SaveChanges();
             }
 
+            AllPasswords.Add(entry);
             ExecuteSearch();
 
             NewAccount = string.Empty;
             NewPassword = string.Empty;
             NewURL = string.Empty;
+            NewEntryTags.Clear();
             OnPropertyChanged(nameof(NewAccount));
             OnPropertyChanged(nameof(NewPassword));
             OnPropertyChanged(nameof(NewURL));
             IsPopupOpen = false;
         }
+
+        private void AddTagToPassword()
+        {
+            if (SelectedPassword != null && SelectedTag != null)
+            {
+                using (var context = new AppDbContext())
+                {
+                    // Vérifiez si le tag est déjà associé à l'entrée
+                    var existingEntry = context.PasswordEntryTag
+                        .FirstOrDefault(pet => pet.PasswordEntryId == SelectedPassword.Id && pet.TagId == SelectedTag.Id);
+
+                    if (existingEntry == null)
+                    {
+                        var passwordEntryTag = new PasswordEntryTag
+                        {
+                            PasswordEntryId = SelectedPassword.Id,
+                            TagId = SelectedTag.Id
+                        };
+
+                        context.PasswordEntryTag.Add(passwordEntryTag);
+                        context.SaveChanges();
+
+                        // Ajouter le tag à la liste en mémoire
+                        SelectedPassword.PasswordEntryTag.Add(passwordEntryTag);
+
+                        // Notifier que les tags ont changé
+                        OnPropertyChanged(nameof(SelectedPassword));
+                        OnPropertyChanged(nameof(SelectedPassword.TagNames));
+
+                        LoadPasswordsFromDatabase();
+                        MessageBox.Show($"Le tag '{SelectedTag.TagName}' a été ajouté à l'entrée sélectionnée.");
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Le tag '{SelectedTag.TagName}' est déjà associé à cette entrée.");
+                    }
+                }
+            }
+        }
+        private void RemoveTagFromPassword(object parameter)
+        {
+            if (parameter is PasswordEntryTag passwordEntryTag && SelectedPassword != null)
+            {
+                using (var context = new AppDbContext())
+                {
+                    var entryToRemove = context.PasswordEntryTag
+                        .FirstOrDefault(pet => pet.PasswordEntryId == passwordEntryTag.PasswordEntryId && pet.TagId == passwordEntryTag.TagId);
+
+                    if (entryToRemove != null)
+                    {
+                        context.PasswordEntryTag.Remove(entryToRemove);
+                        context.SaveChanges();
+
+                        // Supprimer le tag de la liste en mémoire
+                        SelectedPassword.PasswordEntryTag.Remove(passwordEntryTag);
+
+                        // Notifier que les tags ont changé
+                        OnPropertyChanged(nameof(SelectedPassword));
+                        OnPropertyChanged(nameof(SelectedPassword.TagNames));
+                        LoadPasswordsFromDatabase();
+
+                        MessageBox.Show($"Le tag '{passwordEntryTag.Tag.TagName}' a été supprimé.");
+                    }
+                }
+            }
+        }
+
+        private void FilterEntriesByTag()
+        {
+            if (SelectedFilterTag == null || SelectedFilterTag.TagName == "All")
+            {
+                // Si aucun tag n'est sélectionné ou si "All" est sélectionné, afficher toutes les entrées
+                FilteredPasswords = new ObservableCollection<PasswordEntry>(AllPasswords);
+            }
+            else
+            {
+                // Filtrer les entrées qui contiennent le tag sélectionné
+                var filtered = AllPasswords.Where(p => p.PasswordEntryTag.Any(pet => pet.TagId == SelectedFilterTag.Id));
+                FilteredPasswords = new ObservableCollection<PasswordEntry>(filtered);
+            }
+        }
+
         public void ExecuteSearch()
         {
             if (string.IsNullOrWhiteSpace(SearchText))
