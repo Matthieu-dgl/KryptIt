@@ -65,6 +65,12 @@ namespace KryptIt.ViewModels
                 {
                     MainWindow mainWindow = new MainWindow();
                     mainWindow.Show();
+
+                    if (parameter is Window currentWindow)
+                    {
+                        currentWindow.Close();
+                    }
+
                     Window.GetWindow(Application.Current.MainWindow).Close();
                     Application.Current.MainWindow = mainWindow;
                 });

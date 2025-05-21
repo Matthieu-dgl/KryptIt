@@ -262,7 +262,7 @@ namespace KryptIt.ViewModels
         public ICommand SaveSettingsCommand { get; }
 
         // Clé de chiffrement
-        private const string EncryptionKey = "MaCleSecrete123456";
+        private const string EncryptionKey = "Ax7p2Dx5MM87s5D22Gz";
 
         public MainViewModel()
         {

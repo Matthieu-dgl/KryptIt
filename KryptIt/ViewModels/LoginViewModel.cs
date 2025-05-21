@@ -102,8 +102,6 @@ namespace KryptIt.ViewModels
                         var viewModel = twoFactorWindow.DataContext as TwoFactorViewModel;
                         viewModel.SetUser(user);
                         twoFactorWindow.Show();
-
-                        // Don't close the current window yet, it will be closed after successful 2FA
                     });
                 }
                 else
