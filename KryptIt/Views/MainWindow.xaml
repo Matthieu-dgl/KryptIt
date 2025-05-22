@@ -98,50 +98,72 @@
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                              Margin="0,0,0,10"/>
                     <!-- Tableau des mots de passe -->
-                    <Border Background="White" CornerRadius="4" Padding="10">
-                        <ListView ItemsSource="{Binding FilteredPasswords}" 
-                                  SelectedItem="{Binding SelectedPassword}"
-                                  Style="{StaticResource MaterialDesignListView}">
-                            <ListView.Resources>
-                                <ContextMenu x:Key="ItemContextMenu">
-                                    <MenuItem Header="Open in new Tab" Command="{Binding DataContext.OpenInNewTabCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
-                                    <Separator/>
-                                    <MenuItem Header="Copy Username" Command="{Binding DataContext.CopyUsernameCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
-                                    <MenuItem Header="Copy Password" Command="{Binding DataContext.CopyPasswordCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
-                                    <MenuItem Header="Copy Website" Command="{Binding DataContext.CopyWebsiteCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
-                                    <Separator/>
-                                    <MenuItem Header="Auto-Fill" Command="{Binding DataContext.AutoFillCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
-                                    <Separator/>
-                                    <MenuItem Header="Edit tags" Command="{Binding DataContext.OpenTagPopupCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
-                                    <Separator/>
-                                    <MenuItem Header="Delete" Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
-                                </ContextMenu>
-                                <ContextMenu x:Key="EmptyAreaContextMenu">
-                                    <MenuItem Header="Add an entry" Command="{Binding OpenPopupCommand}" />
-                                </ContextMenu>
-                            </ListView.Resources>
-                            <!-- Appliquer le menu contextuel aux éléments du ListView -->
-                            <ListView.ItemContainerStyle>
-                                <Style TargetType="ListViewItem" BasedOn="{StaticResource MaterialDesignGridViewItem}">
-                                    <Setter Property="ContextMenu" Value="{StaticResource ItemContextMenu}"/>
-                                </Style>
-                            </ListView.ItemContainerStyle>
+                    <TabControl>
+                        <TabItem Header="Mes mots de passe">
+                            <Border Background="White" CornerRadius="4" Padding="10">
+                                <ListView ItemsSource="{Binding FilteredPasswords}" 
+              SelectedItem="{Binding SelectedPassword}"
+              Style="{StaticResource MaterialDesignListView}">
+                                    <ListView.Resources>
+                                        <ContextMenu x:Key="ItemContextMenu">
+                                            <MenuItem Header="Open in new Tab" Command="{Binding DataContext.OpenInNewTabCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                            <Separator/>
+                                            <MenuItem Header="Copy Username" Command="{Binding DataContext.CopyUsernameCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                            <MenuItem Header="Copy Password" Command="{Binding DataContext.CopyPasswordCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                            <MenuItem Header="Copy Website" Command="{Binding DataContext.CopyWebsiteCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                            <Separator/>
+                                            <MenuItem Header="Auto-Fill" Command="{Binding DataContext.AutoFillCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                            <Separator/>
+                                            <MenuItem Header="Edit tags" Command="{Binding DataContext.OpenTagPopupCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                            <Separator/>
+                                            <MenuItem Header="Partager..." Command="{Binding DataContext.OpenSharePopupCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                            <Separator/>
+                                            <MenuItem Header="Delete" Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                        </ContextMenu>
+                                        <ContextMenu x:Key="EmptyAreaContextMenu">
+                                            <MenuItem Header="Add an entry" Command="{Binding OpenPopupCommand}" />
+                                        </ContextMenu>
+                                    </ListView.Resources>
+                                    <!-- Appliquer le menu contextuel aux éléments du ListView -->
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem" BasedOn="{StaticResource MaterialDesignGridViewItem}">
+                                            <Setter Property="ContextMenu" Value="{StaticResource ItemContextMenu}"/>
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
 
-                            <!-- Menu contextuel pour la zone vide -->
-                            <ListView.ContextMenu>
-                                <StaticResource ResourceKey="EmptyAreaContextMenu"/>
-                            </ListView.ContextMenu>
-                            <ListView.View>
-                                <GridView>
-                                    <GridViewColumn Header="URL" Width="180" DisplayMemberBinding="{Binding SiteName}" />
-                                    <GridViewColumn Header="Account" Width="150" DisplayMemberBinding="{Binding Login}" />
-                                    <GridViewColumn Header="Password" Width="220" DisplayMemberBinding="{Binding EncryptedPassword}" />
-                                    <GridViewColumn Header="Tags" Width="200" DisplayMemberBinding="{Binding TagNames}" />
-                                    <GridViewColumn Header="Date" Width="140" DisplayMemberBinding="{Binding CreatedAt}" />
-                                </GridView>
-                            </ListView.View>
-                        </ListView>
-                    </Border>
+                                    <!-- Menu contextuel pour la zone vide -->
+                                    <ListView.ContextMenu>
+                                        <StaticResource ResourceKey="EmptyAreaContextMenu"/>
+                                    </ListView.ContextMenu>
+                                    <ListView.View>
+                                        <GridView>
+                                            <GridViewColumn Header="URL" Width="180" DisplayMemberBinding="{Binding SiteName}" />
+                                            <GridViewColumn Header="Account" Width="150" DisplayMemberBinding="{Binding Login}" />
+                                            <GridViewColumn Header="Password" Width="220" DisplayMemberBinding="{Binding EncryptedPassword}" />
+                                            <GridViewColumn Header="Tags" Width="200" DisplayMemberBinding="{Binding TagNames}" />
+                                            <GridViewColumn Header="Date" Width="140" DisplayMemberBinding="{Binding CreatedAt}" />
+                                        </GridView>
+                                    </ListView.View>
+                                </ListView>
+                            </Border>
+                        </TabItem>
+                        <TabItem Header="Partagés avec moi">
+                            <ListView ItemsSource="{Binding SharedPasswords}" 
+                  Style="{StaticResource MaterialDesignListView}">
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn Header="URL" Width="180" DisplayMemberBinding="{Binding SiteName}" />
+                                        <GridViewColumn Header="Compte" Width="150" DisplayMemberBinding="{Binding Login}" />
+                                        <GridViewColumn Header="Mot de passe" Width="220" DisplayMemberBinding="{Binding EncryptedPassword}" />
+                                        <GridViewColumn Header="Tags" Width="200" DisplayMemberBinding="{Binding TagNames}" />
+                                        <GridViewColumn Header="Date" Width="140" DisplayMemberBinding="{Binding CreatedAt}" />
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+                        </TabItem>
+                    </TabControl>
+
+                    
                 </StackPanel>
             </Grid>
         </Grid>
@@ -245,6 +267,34 @@
             </Border>
         </Popup>
 
+        <!-- POP-UP pour partager un mdp -->
+        <Popup IsOpen="{Binding IsSharePopupOpen}" 
+               Placement="Center" 
+               AllowsTransparency="True" 
+               PopupAnimation="Fade" 
+               StaysOpen="False"
+               Width="350"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center">
+            <Border Background="White" CornerRadius="5" Padding="30" BorderBrush="#E0E0E0" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock Text="Partager ce mot de passe" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+                    <ComboBox ItemsSource="{Binding OtherUsers}" 
+                      SelectedItem="{Binding SelectedUserToShare}" 
+                      DisplayMemberPath="Username"
+                      Style="{StaticResource MaterialDesignComboBox}" 
+                      Margin="0,0,0,10"/>
+                    <Button Content="Partager" 
+                    Command="{Binding SharePasswordCommand}" 
+                    Style="{StaticResource MaterialDesignRaisedButton}" 
+                    Margin="0,0,0,10"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                        <Button Content="Fermer" Command="{Binding CloseSharePopupCommand}" 
+                        Style="{StaticResource MaterialDesignFlatButton}" Margin="0,0,10,0"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Popup>
 
         <!-- Overlay Settings -->
         <Grid x:Name="SettingsContent"

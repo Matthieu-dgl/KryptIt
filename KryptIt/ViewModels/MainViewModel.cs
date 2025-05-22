@@ -15,6 +15,7 @@ using OtpNet;
 using QRCoder;
 using System.Drawing;
 using System.Windows.Media.Imaging;
+using System.Data.Entity;
 
 namespace KryptIt.ViewModels
 {
@@ -241,6 +242,40 @@ namespace KryptIt.ViewModels
             }
         }
 
+        private bool _isSharePopupOpen;
+        public bool IsSharePopupOpen
+        {
+            get => _isSharePopupOpen;
+            set { _isSharePopupOpen = value; OnPropertyChanged(nameof(IsSharePopupOpen)); }
+        }
+
+        private ObservableCollection<User> _otherUsers;
+        public ObservableCollection<User> OtherUsers
+        {
+            get => _otherUsers;
+            set { _otherUsers = value; OnPropertyChanged(nameof(OtherUsers)); }
+        }
+
+        private User _selectedUserToShare;
+        public User SelectedUserToShare
+        {
+            get => _selectedUserToShare;
+            set
+            {
+                _selectedUserToShare = value;
+                OnPropertyChanged(nameof(SelectedUserToShare));
+                ((RelayCommand)SharePasswordCommand).RaiseCanExecuteChanged();
+            }
+        }
+
+        private ObservableCollection<PasswordEntry> _sharedPasswords;
+        public ObservableCollection<PasswordEntry> SharedPasswords
+        {
+            get => _sharedPasswords;
+            set { _sharedPasswords = value; OnPropertyChanged(nameof(SharedPasswords)); }
+        }
+
+
         public ICommand OpenInNewTabCommand { get; }
         public ICommand CopyUsernameCommand { get; }
         public ICommand CopyPasswordCommand { get; }
@@ -258,8 +293,10 @@ namespace KryptIt.ViewModels
         public ICommand OpenTagPopupCommand { get; }
         public ICommand CloseTagPopupCommand { get; }
         public ICommand RemoveTagCommand { get; }
-
         public ICommand SaveSettingsCommand { get; }
+        public ICommand OpenSharePopupCommand { get; }
+        public ICommand CloseSharePopupCommand { get; }
+        public ICommand SharePasswordCommand { get; }
 
         // Clé de chiffrement
         private const string EncryptionKey = "Ax7p2Dx5MM87s5D22Gz";
@@ -283,6 +320,10 @@ namespace KryptIt.ViewModels
             OpenTagPopupCommand = new RelayCommand(o => IsTagPopupOpen = true, o => SelectedPassword != null);
             CloseTagPopupCommand = new RelayCommand(o => IsTagPopupOpen = false);
 
+            OpenSharePopupCommand = new RelayCommand(o => OpenSharePopup(), o => SelectedPassword != null);
+            CloseSharePopupCommand = new RelayCommand(o => IsSharePopupOpen = false);
+            SharePasswordCommand = new RelayCommand(o => SharePassword(), o => SelectedUserToShare != null && SelectedPassword != null);
+
             OpenSettingsCommand = new RelayCommand(o => OpenSettings());
             CloseSettingsCommand = new RelayCommand(o => CloseSettings());
             SaveSettingsCommand = new RelayCommand(o => SaveSettings());
@@ -295,6 +336,7 @@ namespace KryptIt.ViewModels
             AutoFillCommand = new RelayCommand(o => AutoFill());
 
             LoadPasswordsFromDatabase();
+            LoadSharedPasswords();
             LoadAvailableTags();
             LoadUserSettings();
             ExecuteSearch();
@@ -528,6 +570,20 @@ namespace KryptIt.ViewModels
             }
         }
 
+        private void LoadSharedPasswords()
+        {
+            using (var context = new AppDbContext())
+            {
+                var shared = context.SharedPassword
+                    .Where(sp => sp.UserId == SessionManager.CurrentUser.Id)
+                    .Select(sp => sp.PasswordEntry)
+                    .Include("PasswordEntryTag.Tag")
+                    .ToList();
+
+                SharedPasswords = new ObservableCollection<PasswordEntry>(shared);
+            }
+        }
+
         private void LoadAvailableTags()
         {
             using (var context = new AppDbContext())
@@ -646,6 +702,55 @@ namespace KryptIt.ViewModels
                 }
             }
         }
+
+        private void OpenSharePopup()
+        {
+            LoadOtherUsers();
+            IsSharePopupOpen = true;
+        }
+
+        private void LoadOtherUsers()
+        {
+            using (var context = new AppDbContext())
+            {
+                var users = context.User
+                    .Where(u => u.Id != SessionManager.CurrentUser.Id)
+                    .ToList();
+                OtherUsers = new ObservableCollection<User>(users);
+            }
+        }
+
+        private void SharePassword()
+        {
+            if (SelectedUserToShare == null || SelectedPassword == null)
+                return;
+
+            using (var context = new AppDbContext())
+            {
+                // Vérifie si déjà partagé
+                var alreadyShared = context.SharedPassword
+                    .Any(sp => sp.PasswordEntryId == SelectedPassword.Id && sp.UserId == SelectedUserToShare.Id);
+
+                if (alreadyShared)
+                {
+                    MessageBox.Show("Ce mot de passe est déjà partagé avec cet utilisateur.");
+                    return;
+                }
+
+                var shared = new SharedPassword
+                {
+                    PasswordEntryId = SelectedPassword.Id,
+                    UserId = SelectedUserToShare.Id,
+                    Permission = true
+                };
+                context.SharedPassword.Add(shared);
+                context.SaveChanges();
+            }
+
+            MessageBox.Show("Mot de passe partagé !");
+            IsSharePopupOpen = false;
+        }
+
 
         private void FilterEntriesByTag()
         {
