@@ -162,6 +162,7 @@
     <Compile Include="Managers\SessionManager.cs" />
     <Compile Include="Models\AppDbContext.cs" />
     <Compile Include="Models\DatabaseInitializer.cs" />
+    <Compile Include="Models\PasswordEntryExportDto.cs" />
     <Compile Include="Models\PasswordEntryTag.cs" />
     <Compile Include="Models\SharedPassword.cs" />
     <Compile Include="Models\Tag.cs" />

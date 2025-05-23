@@ -16,6 +16,11 @@ using QRCoder;
 using System.Drawing;
 using System.Windows.Media.Imaging;
 using System.Data.Entity;
+using System.Text;
+using System.Xml.Serialization;
+using Microsoft.Win32;
+using System.Collections.Generic;
+
 
 namespace KryptIt.ViewModels
 {
@@ -27,6 +32,10 @@ namespace KryptIt.ViewModels
 
         [DllImport("user32.dll")]
         private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         public ObservableCollection<PasswordEntry> AllPasswords { get; set; }
 
@@ -275,6 +284,11 @@ namespace KryptIt.ViewModels
             set { _sharedPasswords = value; OnPropertyChanged(nameof(SharedPasswords)); }
         }
 
+        private ObservableCollection<PasswordEntry> GetUserPasswords()
+        {
+            return AllPasswords;
+        }
+
 
         public ICommand OpenInNewTabCommand { get; }
         public ICommand CopyUsernameCommand { get; }
@@ -297,6 +311,10 @@ namespace KryptIt.ViewModels
         public ICommand OpenSharePopupCommand { get; }
         public ICommand CloseSharePopupCommand { get; }
         public ICommand SharePasswordCommand { get; }
+        public ICommand ExportCsvCommand { get; }
+        public ICommand ExportXmlCommand { get; }
+        public ICommand ImportCommand { get; }
+
 
         // Clé de chiffrement
         private const string EncryptionKey = "Ax7p2Dx5MM87s5D22Gz";
@@ -334,6 +352,10 @@ namespace KryptIt.ViewModels
             LogoutCommand = new RelayCommand(o => Logout());
 
             AutoFillCommand = new RelayCommand(o => AutoFill());
+
+            ExportCsvCommand = new RelayCommand(o => ExportCsv());
+            ExportXmlCommand = new RelayCommand(o => ExportXml());
+            ImportCommand = new RelayCommand(o => Import());
 
             LoadPasswordsFromDatabase();
             LoadSharedPasswords();
@@ -792,8 +814,140 @@ namespace KryptIt.ViewModels
             IsDefaultViewVisible = true;
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged(string propertyName) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        private void ExportCsv()
+        {
+            var passwords = GetUserPasswords();
+            if (passwords == null || passwords.Count == 0)
+            {
+                MessageBox.Show("Aucun mot de passe à exporter.");
+                return;
+            }
+
+            var dialog = new SaveFileDialog
+            {
+                Filter = "CSV files (*.csv)|*.csv",
+                FileName = "passwords.csv"
+            };
+            if (dialog.ShowDialog() == true)
+            {
+                var sb = new StringBuilder();
+                sb.AppendLine("SiteName,Login,EncryptedPassword,Description,CreatedAt");
+                foreach (var entry in passwords)
+                {
+                    sb.AppendLine($"\"{entry.SiteName}\",\"{entry.Login}\",\"{entry.EncryptedPassword}\",\"{entry.Description}\",\"{entry.CreatedAt:yyyy-MM-dd HH:mm:ss}\"");
+                }
+                File.WriteAllText(dialog.FileName, sb.ToString(), Encoding.UTF8);
+                MessageBox.Show("Export CSV terminé !");
+            }
+        }
+
+        private void ExportXml()
+        {
+            var passwords = GetUserPasswords();
+            if (passwords == null || passwords.Count == 0)
+            {
+                MessageBox.Show("Aucun mot de passe à exporter.");
+                return;
+            }
+
+            var dialog = new SaveFileDialog
+            {
+                Filter = "XML files (*.xml)|*.xml",
+                FileName = "passwords.xml"
+            };
+            if (dialog.ShowDialog() == true)
+            {
+                var exportList = passwords.Select(entry => new PasswordEntryExportDto
+                {
+                    SiteName = entry.SiteName,
+                    Login = entry.Login,
+                    EncryptedPassword = entry.EncryptedPassword,
+                    Description = entry.Description,
+                    CreatedAt = entry.CreatedAt
+                }).ToList();
+
+                var serializer = new XmlSerializer(typeof(List<PasswordEntryExportDto>));
+                using (var stream = new FileStream(dialog.FileName, FileMode.Create))
+                {
+                    serializer.Serialize(stream, exportList);
+                }
+                MessageBox.Show("Export XML terminé !");
+            }
+        }
+
+        private void Import()
+        {
+            var dialog = new OpenFileDialog
+            {
+                Filter = "CSV files (*.csv)|*.csv|XML files (*.xml)|*.xml",
+                Multiselect = false
+            };
+            if (dialog.ShowDialog() == true)
+            {
+                var ext = Path.GetExtension(dialog.FileName).ToLower();
+                if (ext == ".csv")
+                    ImportFromCsv(dialog.FileName);
+                else if (ext == ".xml")
+                    ImportFromXml(dialog.FileName);
+            }
+        }
+
+        private void ImportFromCsv(string filePath)
+        {
+            var lines = File.ReadAllLines(filePath, Encoding.UTF8);
+            if (lines.Length <= 1) return;
+
+            using (var context = new AppDbContext())
+            {
+                foreach (var line in lines.Skip(1))
+                {
+                    var fields = line.Split(',').Select(f => f.Trim('"')).ToArray();
+                    if (fields.Length < 6) continue;
+
+                    var entry = new PasswordEntry
+                    {
+                        UserId = SessionManager.CurrentUser.Id,
+                        SiteName = fields[0],
+                        Login = fields[1],
+                        EncryptedPassword = fields[2],
+                        Description = fields[3],
+                        CreatedAt = DateTime.TryParse(fields[4], out var dt) ? dt : DateTime.Now
+                    };
+                    context.PasswordEntry.Add(entry);
+                }
+                context.SaveChanges();
+            }
+            LoadPasswordsFromDatabase();
+            MessageBox.Show("Import CSV terminé !");
+        }
+
+        private void ImportFromXml(string filePath)
+        {
+            var serializer = new XmlSerializer(typeof(List<PasswordEntryExportDto>));
+            using (var stream = new FileStream(filePath, FileMode.Open))
+            {
+                var entries = (List<PasswordEntryExportDto>)serializer.Deserialize(stream);
+                using (var context = new AppDbContext())
+                {
+                    foreach (var dto in entries)
+                    {
+                        var entry = new PasswordEntry
+                        {
+                            UserId = SessionManager.CurrentUser.Id,
+                            SiteName = dto.SiteName,
+                            Login = dto.Login,
+                            EncryptedPassword = dto.EncryptedPassword,
+                            Description = dto.Description,
+                            CreatedAt = dto.CreatedAt
+                        };
+                        context.PasswordEntry.Add(entry);
+                    }
+                    context.SaveChanges();
+                }
+            }
+            LoadPasswordsFromDatabase();
+            MessageBox.Show("Import XML terminé !");
+        }
+
     }
 }
