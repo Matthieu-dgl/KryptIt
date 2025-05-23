@@ -57,10 +57,8 @@ namespace KryptIt.ViewModels
 
             if (isValid)
             {
-                // Set authenticated user
                 SessionManager.CurrentUser = _user;
 
-                // Close this window and open main window
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     MainWindow mainWindow = new MainWindow();

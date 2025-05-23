@@ -92,10 +92,8 @@ namespace KryptIt.ViewModels
             var user = _context.User.SingleOrDefault(u => u.Username == Username && u.Password == Password);
             if (user != null)
             {
-                // Check if 2FA is enabled for this user
                 if (user.TwoFactorEnabled && !string.IsNullOrEmpty(user.TwoFactorSecret))
                 {
-                    // Open 2FA verification window
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         TwoFactorWindow twoFactorWindow = new TwoFactorWindow();
@@ -106,7 +104,6 @@ namespace KryptIt.ViewModels
                 }
                 else
                 {
-                    // No 2FA required, proceed to main window
                     SessionManager.CurrentUser = user;
 
                     Application.Current.Dispatcher.Invoke(() =>

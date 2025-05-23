@@ -11,11 +11,10 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!-- Thème MaterialDesign compatible -->
+                <!-- Thème MaterialDesign -->
                 <materialDesign:BundledTheme BaseTheme="Light" PrimaryColor="DeepPurple" SecondaryColor="Lime"/>
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <!-- Converters -->
             <conv:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter"/>
             <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         </ResourceDictionary>
@@ -124,7 +123,6 @@
                                             <MenuItem Header="Add an entry" Command="{Binding OpenPopupCommand}" />
                                         </ContextMenu>
                                     </ListView.Resources>
-                                    <!-- Appliquer le menu contextuel aux éléments du ListView -->
                                     <ListView.ItemContainerStyle>
                                         <Style TargetType="ListViewItem" BasedOn="{StaticResource MaterialDesignGridViewItem}">
                                             <Setter Property="ContextMenu" Value="{StaticResource ItemContextMenu}"/>
@@ -168,7 +166,7 @@
             </Grid>
         </Grid>
 
-        <!-- POP-UP pour ajouter un compte (overlay) -->
+        <!-- POP-UP pour ajouter un compte -->
         <Popup IsOpen="{Binding IsPopupOpen}" 
                Placement="Center" 
                AllowsTransparency="True" 

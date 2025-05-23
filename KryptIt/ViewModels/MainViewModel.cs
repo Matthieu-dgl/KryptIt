@@ -33,6 +33,11 @@ namespace KryptIt.ViewModels
         [DllImport("user32.dll")]
         private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        private const int SW_MINIMIZE = 6;
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -315,8 +320,6 @@ namespace KryptIt.ViewModels
         public ICommand ExportXmlCommand { get; }
         public ICommand ImportCommand { get; }
 
-
-        // Clé de chiffrement
         private const string EncryptionKey = "Ax7p2Dx5MM87s5D22Gz";
 
         public MainViewModel()
@@ -366,7 +369,6 @@ namespace KryptIt.ViewModels
 
         private void LoadUserSettings()
         {
-            // Check if current user has 2FA enabled
             using (var context = new AppDbContext())
             {
                 var user = context.User.FirstOrDefault(u => u.Id == SessionManager.CurrentUser.Id);
@@ -389,19 +391,15 @@ namespace KryptIt.ViewModels
 
             try
             {
-                // Generate the URI for the QR code
                 string issuer = "KryptIt";
                 string uri = $"otpauth://totp/{Uri.EscapeDataString(issuer)}:{Uri.EscapeDataString(SessionManager.CurrentUser.Username)}?secret={secret}&issuer={Uri.EscapeDataString(issuer)}";
 
-                // Generate the QR code
                 QRCodeGenerator qrGenerator = new QRCodeGenerator();
                 QRCodeData qrCodeData = qrGenerator.CreateQrCode(uri, QRCodeGenerator.ECCLevel.Q);
                 QRCode qrCode = new QRCode(qrCodeData);
 
-                // Convert the QR code to an image
                 Bitmap qrCodeImage = qrCode.GetGraphic(20);
 
-                // Convert to BitmapImage for WPF
                 using (MemoryStream memory = new MemoryStream())
                 {
                     qrCodeImage.Save(memory, System.Drawing.Imaging.ImageFormat.Png);
@@ -439,6 +437,10 @@ namespace KryptIt.ViewModels
 
         public void AutoFillLogin(string username, string password)
         {
+            var mainWindow = Application.Current.MainWindow;
+            var mainWindowHandle = new System.Windows.Interop.WindowInteropHelper(mainWindow).Handle;
+            ShowWindow(mainWindowHandle, SW_MINIMIZE);
+
             IntPtr hWnd = FindWindow("Chrome_WidgetWin_1", null);
             if (hWnd != IntPtr.Zero)
             {
@@ -503,7 +505,11 @@ namespace KryptIt.ViewModels
 
         private void CopyPassword()
         {
-            Clipboard.SetText(SelectedPassword?.EncryptedPassword);
+            if (SelectedPassword != null)
+            {
+                string decryptedPassword = SecurityHelper.Decrypt(SelectedPassword.EncryptedPassword, EncryptionKey);
+                Clipboard.SetText(decryptedPassword);
+            }
         }
 
         private void CopyWebsite()
@@ -532,14 +538,11 @@ namespace KryptIt.ViewModels
 
         private void GenerateTwoFactorSecret()
         {
-            // Generate a unique secret
             var key = KeyGeneration.GenerateRandomKey(20);
             TwoFactorSecret = Base32Encoding.ToString(key);
 
-            // Generate QR code from the secret
             GenerateQrCodeFromSecret(TwoFactorSecret);
 
-            // Update the user in the database
             using (var context = new AppDbContext())
             {
                 var user = context.User.FirstOrDefault(u => u.Id == SessionManager.CurrentUser.Id);
@@ -553,7 +556,6 @@ namespace KryptIt.ViewModels
 
         private void DisableTwoFactorAuthentication()
         {
-            // Désactiver la 2FA pour l'utilisateur
             using (var context = new AppDbContext())
             {
                 var user = context.User.SingleOrDefault(u => u.Id == SessionManager.CurrentUser.Id);
@@ -665,7 +667,6 @@ namespace KryptIt.ViewModels
             {
                 using (var context = new AppDbContext())
                 {
-                    // Vérifiez si le tag est déjà associé à l'entrée
                     var existingEntry = context.PasswordEntryTag
                         .FirstOrDefault(pet => pet.PasswordEntryId == SelectedPassword.Id && pet.TagId == SelectedTag.Id);
 
@@ -680,10 +681,8 @@ namespace KryptIt.ViewModels
                         context.PasswordEntryTag.Add(passwordEntryTag);
                         context.SaveChanges();
 
-                        // Ajouter le tag à la liste en mémoire
                         SelectedPassword.PasswordEntryTag.Add(passwordEntryTag);
 
-                        // Notifier que les tags ont changé
                         OnPropertyChanged(nameof(SelectedPassword));
                         OnPropertyChanged(nameof(SelectedPassword.TagNames));
 
@@ -711,10 +710,8 @@ namespace KryptIt.ViewModels
                         context.PasswordEntryTag.Remove(entryToRemove);
                         context.SaveChanges();
 
-                        // Supprimer le tag de la liste en mémoire
                         SelectedPassword.PasswordEntryTag.Remove(passwordEntryTag);
 
-                        // Notifier que les tags ont changé
                         OnPropertyChanged(nameof(SelectedPassword));
                         OnPropertyChanged(nameof(SelectedPassword.TagNames));
                         LoadPasswordsFromDatabase();
@@ -749,7 +746,6 @@ namespace KryptIt.ViewModels
 
             using (var context = new AppDbContext())
             {
-                // Vérifie si déjà partagé
                 var alreadyShared = context.SharedPassword
                     .Any(sp => sp.PasswordEntryId == SelectedPassword.Id && sp.UserId == SelectedUserToShare.Id);
 
@@ -778,12 +774,10 @@ namespace KryptIt.ViewModels
         {
             if (SelectedFilterTag == null || SelectedFilterTag.TagName == "All")
             {
-                // Si aucun tag n'est sélectionné ou si "All" est sélectionné, afficher toutes les entrées
                 FilteredPasswords = new ObservableCollection<PasswordEntry>(AllPasswords);
             }
             else
             {
-                // Filtrer les entrées qui contiennent le tag sélectionné
                 var filtered = AllPasswords.Where(p => p.PasswordEntryTag.Any(pet => pet.TagId == SelectedFilterTag.Id));
                 FilteredPasswords = new ObservableCollection<PasswordEntry>(filtered);
             }

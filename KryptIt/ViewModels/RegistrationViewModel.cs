@@ -109,7 +109,6 @@ namespace KryptIt.ViewModels
 
         private void Register(object parameter)
         {
-            // Vérifier si l'utilisateur existe déjà
             var existingUser = _context.User.SingleOrDefault(u => u.Username == Username);
             if (existingUser != null)
             {
@@ -117,7 +116,6 @@ namespace KryptIt.ViewModels
                 return;
             }
 
-            // Créer le nouvel utilisateur
             var user = new User { Username = Username, Password = Password, Email = Email };
             try
             {
@@ -125,7 +123,6 @@ namespace KryptIt.ViewModels
                 _context.SaveChanges();
                 MessageBox.Show("Inscription réussie !");
 
-                // Retour à la page de login
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     LoginWindow loginWindow = new LoginWindow();
@@ -136,7 +133,6 @@ namespace KryptIt.ViewModels
             }
             catch (System.Data.Entity.Validation.DbEntityValidationException ex)
             {
-                // Gérer les erreurs de validation
                 var errorMessages = ex.EntityValidationErrors
                     .SelectMany(e => e.ValidationErrors)
                     .Select(e => e.ErrorMessage);
@@ -145,7 +141,6 @@ namespace KryptIt.ViewModels
             }
             catch (Exception ex)
             {
-                // Gérer d'autres erreurs
                 MessageBox.Show("Une erreur s'est produite lors de l'inscription : " + ex.Message);
             }
         }
